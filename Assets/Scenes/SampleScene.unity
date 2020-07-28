@@ -309,7 +309,7 @@ GameObject:
   - component: {fileID: 2116735423}
   - component: {fileID: 2116735422}
   m_Layer: 0
-  m_Name: CapsuleMark-spicynuts
+  m_Name: CapsuleMark-spicynutsOnNuts
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
