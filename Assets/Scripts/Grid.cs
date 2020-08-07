@@ -4,34 +4,28 @@ using UnityEngine;
 
 public class Grid : MonoBehaviour
 {
-    public int width; // z will match x
-    public int height;
+    public int width = 16; // z will match x
+    public int height = 1;
 
-    public float size; // in unity meters
+    public float size = 1; // in unity meters
 
     public Material mat;
     public GameObject hoverPreview;
 
-    public bool preview; // Draws gizmo preview
+    public bool preview = false; // Draws gizmo preview
 
     GameObject ground;
     Vector3 currentPos;
+    bool validHover;
 
     CreateVoxel createVoxel;
+
+    public CreateVoxel CreateVoxel { set { createVoxel = value;  } }
+
     // Start is called before the first frame update
     void Start()
     {
-        //CreateGrid();
         CreateGroundPlane();
-
-        GameObject createVoxelObj = GameObject.Find("VoxelCreator");
-        if (createVoxelObj != null)
-        {
-            createVoxel = createVoxelObj.GetComponent<CreateVoxel>();
-        } else
-        {
-            Debug.LogError("VoxelCreator not found!");
-        }
     }
 
     private void Update()
@@ -83,24 +77,6 @@ public class Grid : MonoBehaviour
         meshRenderer.material = mat;
     }
 
-    void CreateGridLines()
-    {
-        // Create lines
-        for(int i = 0; i < width; i++)
-        {
-
-        }
-    }
-
-    /// <summary>
-    /// Take a position vector and find the nearest grid item
-    /// </summary>
-    /// <param name="pos"></param>
-    void FindNearestPoint(Vector3 pos)
-    {
-
-    }
-
     private void OnDrawGizmos()
     {
         if (!preview) return;
@@ -119,15 +95,42 @@ public class Grid : MonoBehaviour
             int x = Mathf.FloorToInt(hit.point.x);
             int z = Mathf.FloorToInt(hit.point.z);
             currentPos = new Vector3(x, transform.position.y, z);
+            validHover = true;
             hoverPreview.transform.position = currentPos;
+        } else
+        {
+            validHover = false;
         }
     }
 
     void HandleInput()
     {
-        if (Input.GetButtonDown("Fire1"))
+        if (Input.GetButtonDown("Fire1") && validHover)
         {
             createVoxel.Create(currentPos);
         }
+    }
+
+    // Clean up the voxelCreator script and hoverPreview
+    void OnDestroy()
+    {
+        Destroy(createVoxel.gameObject);
+        createVoxel = null;
+        Destroy(hoverPreview);
+    }
+
+    public void Save(Creation creation)
+    {
+        creation.voxels = createVoxel.CurrentVoxels.ToArray();
+    }
+
+    public void Load(Creation creation)
+    {
+        createVoxel.Load(creation.voxels);
+    }
+
+    public void Undo()
+    {
+        createVoxel.Undo();
     }
 }
