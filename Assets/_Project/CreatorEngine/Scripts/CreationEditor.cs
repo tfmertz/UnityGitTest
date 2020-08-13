@@ -5,129 +5,132 @@ using System.IO;
 
 
 
-namespace CreatorEngine
+/// <summary>
+/// Holds the API for the voxel creation editor.
+/// </summary>
+public class CreationEditor : MonoBehaviour
 {
-    /// <summary>
-    /// Holds the API for the voxel creation editor.
-    /// </summary>
-    public class CreationEditor : MonoBehaviour
+    Creation currentCreation;
+    List<Voxel> currentVoxels;
+
+    // External references
+    public Camera CreatorCamera;
+
+    GameObject grid;
+    Grid gridScript;
+
+    public void CreateNew(string name)
     {
-        Creation currentCreation;
-        List<Voxel> currentVoxels;
-        GameObject voxelParent;
-        public Camera CreatorCamera;
-        GameObject grid;
-        Grid gridScript;
-
-        public void CreateNew(string name)
+        currentCreation = new Creation
         {
-            currentCreation = new Creation
-            {
-                name = name,
-            };
+            name = name,
+        };
 
-            currentVoxels = new List<Voxel>();
+        currentVoxels = new List<Voxel>();
+        SetupGrid();
+    }
+
+    public void Undo()
+    {
+        gridScript.Undo();
+    }
+    public void Load()
+    {
+        // bool not allowed in UI call
+        TryLoad();
+    }
+    public bool TryLoad()
+    {
+        if (File.Exists($"{Application.persistentDataPath}/creation.json"))
+        {
+            string fileData = File.ReadAllText($"{Application.persistentDataPath}/creation.json");
+            currentCreation = JsonUtility.FromJson<Creation>(fileData);
             SetupGrid();
+            gridScript.Load(currentCreation);
+            return true;
         }
-
-        public void Undo()
+        else
         {
-            gridScript.Undo();
+            Debug.Log("No file");
+            return false;
         }
+    }
 
-        public bool Load()
+    public void Save()
+    {
+        if (currentCreation == null)
         {
-            if (File.Exists($"{Application.persistentDataPath}/creation.json"))
-            {
-                string fileData = File.ReadAllText($"{Application.persistentDataPath}/creation.json");
-                currentCreation = JsonUtility.FromJson<Creation>(fileData);
-                SetupGrid();
-                gridScript.Load(currentCreation);
-                return true;
-            }
-            else
-            {
-                Debug.Log("No file");
-                return false;
-            }
+            Debug.Log("No creation to save.");
+            return;
         }
+        // TODO remove possible duplicates, make sure numbers are int for positions
 
-        public void Save()
+
+        // Save our voxel data into the currentcreation
+        gridScript.Save(currentCreation);
+
+        string saveData = JsonUtility.ToJson(currentCreation);
+        Debug.Log(saveData);
+
+        // Save it into a file
+        File.WriteAllText($"{Application.persistentDataPath}/creation.json", saveData);
+    }
+
+    /// <summary>
+    /// Cleans up the grid and current voxel creation
+    /// </summary>
+    public void Exit()
+    {
+        if (grid != null)
         {
-            if (currentCreation == null)
-            {
-                Debug.Log("No creation to save.");
-                return;
-            }
-            // TODO remove possible duplicates, make sure numbers are int for positions
-
-
-            // Save our voxel data into the currentcreation
-            gridScript.Save(currentCreation);
-
-            string saveData = JsonUtility.ToJson(currentCreation);
-            Debug.Log(saveData);
-
-            // Save it into a file
-            File.WriteAllText($"{Application.persistentDataPath}/creation.json", saveData);
+            Destroy(grid);
+            gridScript = null;
         }
+    }
 
-        /// <summary>
-        /// Cleans up the grid and current voxel creation
-        /// </summary>
-        public void Exit()
+    public void SwitchTool(string tool)
+    {
+        if (System.Enum.TryParse(tool, out Tool.Tools enumTool))
         {
-            if (grid != null)
-            {
-                Destroy(grid);
-                gridScript = null;
-            }
-        }
-
-        // Creates the Grid and CreateVoxel objects and scripts
-        void SetupGrid()
+            gridScript.SwitchTool(enumTool);
+        } else
         {
-            // Clean any existing grids
-            Exit();
-
-            // Get needed materials
-            Material gridMat = Resources.Load<Material>("Grid");
-            Material test = Resources.Load<Material>("Test");
-            Material preview = Resources.Load<Material>("Preview");
-
-            // Create grid and voxel creator
-            GameObject voxelCreator = new GameObject("VoxelCreator");
-            CreateVoxel voxelScript = voxelCreator.AddComponent<CreateVoxel>();
-            voxelScript.mat = test;
-
-            grid = new GameObject("Grid");
-            gridScript = grid.AddComponent<Grid>();
-            gridScript.mat = gridMat;
-            gridScript.CreateVoxel = voxelScript;
-            gridScript.Init();
-
-            // Set up hover preview
-            GameObject hoverPreview = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            hoverPreview.name = "HoverPreview";
-            hoverPreview.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-            hoverPreview.GetComponent<MeshRenderer>().material = preview;
-            Destroy(hoverPreview.GetComponent<SphereCollider>());
-
-            gridScript.hoverPreview = hoverPreview;
-            // set up grid for rotation
-            GameObject gridTransform = new GameObject("GridTransform");
-            grid.transform.SetParent(gridTransform.transform);
-            hoverPreview.transform.SetParent(grid.transform);
-            voxelCreator.transform.SetParent(grid.transform);
-
-            gridScript.creatorCamera = CreatorCamera;
-            gridScript.voxelParent = gridTransform;
-            gridScript.transform.position = new Vector3(-8, 0, -8);
-
-            gridTransform.transform.position = new Vector3(8, 0, 8);
-            gridTransform.transform.SetParent(this.transform);
+            Debug.LogWarning($"No tool found of type '{tool}'");
         }
+    }
 
+    // Creates the Grid and CreateVoxel objects and scripts
+    void SetupGrid()
+    {
+        // Clean any existing grids
+        Exit();
 
+        // Get needed materials
+        Material gridMat = Resources.Load<Material>("Grid");
+        Material test = Resources.Load<Material>("Test");
+        Material preview = Resources.Load<Material>("Preview");
+
+        // Create grid and voxel creator
+        GameObject voxelCreator = new GameObject("VoxelCreator");
+        CreateVoxel voxelScript = voxelCreator.AddComponent<CreateVoxel>();
+        voxelScript.mat = test;
+
+        grid = new GameObject("Grid");
+        gridScript = grid.AddComponent<Grid>();
+        gridScript.mat = gridMat;
+        gridScript.CreateVoxel = voxelScript;
+        gridScript.Init();
+
+        GameObject gridTransform = new GameObject("GridTransform");
+        grid.transform.SetParent(gridTransform.transform);
+        voxelCreator.transform.SetParent(grid.transform);
+        gridScript.creatorCamera = CreatorCamera;
+        gridScript.voxelParent = gridTransform;
+
+        gridScript.transform.position = new Vector3(-8, 0, -8);
+        gridTransform.transform.position = new Vector3(8, 0, 8);
+
+        gridTransform.transform.SetParent(this.transform);
+        voxelScript.Grid = gridScript;
     }
 }
