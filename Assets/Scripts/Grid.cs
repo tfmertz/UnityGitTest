@@ -5,20 +5,18 @@ using UnityEngine;
 public class Grid : MonoBehaviour
 {
     public int width = 16; // z will match x
-    public int height = 1;
+    public int height = 3;
 
     public float size = 1; // in unity meters
 
     public Material mat;
-    public GameObject hoverPreview;
-
-    public bool preview = false; // Draws gizmo preview
 
     GameObject ground;
     Vector3 currentPos;
     bool validHover;
 
     CreateVoxel createVoxel;
+    Tool tool;
 
     public CreateVoxel CreateVoxel { set { createVoxel = value;  } }
 
@@ -26,6 +24,7 @@ public class Grid : MonoBehaviour
     void Start()
     {
         CreateGroundPlane();
+        tool = new Tool(createVoxel);
     }
 
     private void Update()
@@ -39,33 +38,16 @@ public class Grid : MonoBehaviour
         HandleHover();
     }
 
-    void CreateGrid()
-    {
-        
-
-        // Go through x
-        for (int i = 0; i < width; i++)
-        {
-            // Go through z
-            for (int j = 0; j < width; j++)
-            {
-                // Start with the position of the grid gameobject
-                Vector3 pos = new Vector3(transform.position.x + (i * size), transform.position.y, transform.position.z + (j * size));
-
-                Gizmos.DrawSphere(pos, 0.1f);
-            }
-        }
-    }
-
     void CreateGroundPlane()
     {
         // Create the component in the heirarchy
         ground = GameObject.CreatePrimitive(PrimitiveType.Quad);
         ground.transform.SetParent(transform);
 
-        // Remove the meshcollider and add box collider
-        Destroy(ground.GetComponent <MeshCollider>());
-        ground.AddComponent<BoxCollider>();
+        // Remove the cooking options
+        ground.GetComponent<MeshCollider>().cookingOptions -= MeshColliderCookingOptions.CookForFasterSimulation;
+        //Destroy(ground.GetComponent <MeshCollider>());
+        //ground.AddComponent<BoxCollider>();
 
         float quadWidth = width * size;
         float center = (width * size / 2);
@@ -77,29 +59,51 @@ public class Grid : MonoBehaviour
         meshRenderer.material = mat;
     }
 
-    private void OnDrawGizmos()
-    {
-        if (!preview) return;
-
-        CreateGrid();
-    }
-
     void HandleHover()
     {
         // Raycast from mouse to detect hover
         RaycastHit hit;
         if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 300.0f))
         {
-            Debug.Log("hit");
             // Round the positioning down to snap
             int x = Mathf.FloorToInt(hit.point.x);
             int z = Mathf.FloorToInt(hit.point.z);
-            currentPos = new Vector3(x, transform.position.y, z);
+            int y = Mathf.FloorToInt(hit.point.y);
+            Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
+            if (y >= height)
+            {
+                // restrict y based off our predetermined height 
+                y = height - 1;
+            }
+            // In case we accidentally get a tiny number smaller than 0
+            if (y < 0) y = 0;
+
+            // Check normals for adding on sides
+            if (tool.activeTool == Tool.Tools.Add)
+            {
+                if (hit.normal.Equals(Vector3.right) || hit.normal.Equals(-Vector3.right))
+                {
+                    x += (int) hit.normal.x;
+                } else if(hit.normal.Equals(Vector3.forward) || hit.normal.Equals(-Vector3.forward))
+                {
+                    z += (int) hit.normal.z;
+                }
+            }
+            else if (tool.activeTool == Tool.Tools.Delete)
+            {
+                if (hit.normal.Equals(Vector3.up) && y > 0)
+                {
+                    y--;
+                }
+            }
+
+            currentPos = new Vector3(x, y, z);
             validHover = true;
-            hoverPreview.transform.position = currentPos;
+            tool.StartPreview(currentPos);
         } else
         {
             validHover = false;
+            tool.StopPreview();
         }
     }
 
@@ -116,7 +120,7 @@ public class Grid : MonoBehaviour
     {
         Destroy(createVoxel.gameObject);
         createVoxel = null;
-        Destroy(hoverPreview);
+        tool.Cleanup();
     }
 
     public void Save(Creation creation)
@@ -132,5 +136,10 @@ public class Grid : MonoBehaviour
     public void Undo()
     {
         createVoxel.Undo();
+    }
+
+    public void SwitchTool(Tool.Tools toolEnum)
+    {
+        tool.SwitchTool(toolEnum);
     }
 }

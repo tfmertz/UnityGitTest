@@ -76,6 +76,17 @@ public class CreationEditor : MonoBehaviour
         }
     }
 
+    public void SwitchTool(string tool)
+    {
+        if (System.Enum.TryParse(tool, out Tool.Tools enumTool))
+        {
+            gridScript.SwitchTool(enumTool);
+        } else
+        {
+            Debug.LogWarning($"No tool found of type '{tool}'");
+        }
+    }
+
     // Creates the Grid and CreateVoxel objects and scripts
     void SetupGrid()
     {
@@ -85,7 +96,6 @@ public class CreationEditor : MonoBehaviour
         // Get needed materials
         Material gridMat = Resources.Load<Material>("Grid");
         Material test = Resources.Load<Material>("Test");
-        Material preview = Resources.Load<Material>("Preview");
 
         // Create grid and voxel creator
         GameObject voxelCreator = new GameObject("VoxelCreator");
@@ -97,14 +107,6 @@ public class CreationEditor : MonoBehaviour
         gridScript.mat = gridMat;
         gridScript.CreateVoxel = voxelScript;
 
-        // Set up hover preview
-        GameObject hoverPreview = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        hoverPreview.name = "HoverPreview";
-        hoverPreview.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-        hoverPreview.GetComponent<MeshRenderer>().material = preview;
-        Destroy(hoverPreview.GetComponent<SphereCollider>());
-        gridScript.hoverPreview = hoverPreview;
+        voxelScript.Grid = gridScript;
     }
-
-
 }

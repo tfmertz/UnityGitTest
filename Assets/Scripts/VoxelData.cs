@@ -22,12 +22,12 @@ public static class VoxelData
 
     public static readonly Vector3[] faceChecks =
     {
-        new Vector3(0.0f, 0.0f, 1.0f), // check front
-        new Vector3(0.0f, 0.0f, -1.0f), // check back
+        new Vector3(0.0f, 0.0f, -1.0f), // check front
+        new Vector3(0.0f, 0.0f, 1.0f), // check back
         new Vector3(0.0f, 1.0f, 0.0f), // top
         new Vector3(0.0f, -1.0f, 0.0f), // bottom
-        new Vector3(1.0f, 0.0f, 0.0f), // right
         new Vector3(-1.0f, 0.0f, 0.0f), // left
+        new Vector3(1.0f, 0.0f, 0.0f), // right
     };
 
     // Each outer array holds the index of the vertices inside vertices array that make
@@ -43,8 +43,8 @@ public static class VoxelData
         { 5, 6, 4, 7 }, // back
         { 3, 7, 2, 6 }, // top
         { 4, 0, 5, 1 }, // bottom
-        { 1, 2, 5, 6 }, // right
         { 4, 7, 0, 3 }, // left
+        { 1, 2, 5, 6 }, // right
     };
 
     public static readonly Vector2[] uvs =
