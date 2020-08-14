@@ -24,11 +24,15 @@ public class Grid : MonoBehaviour
     public CreateVoxel CreateVoxel { set { createVoxel = value;  } }
 
     // Start is called before the first frame update
-    public void Init()
+    public void Init(GameObject vParent = null)
     {
         CreateGroundPlane();
+        if (!vParent) vParent = gameObject;
+        voxelParent = vParent;
         tool = new Tool(createVoxel);
+        tool.SetParent(gameObject);
     }
+
 
     private void Update()
     {
@@ -80,8 +84,11 @@ public class Grid : MonoBehaviour
             int z = Mathf.FloorToInt(hPoint.z);
             int y = Mathf.FloorToInt(hPoint.y);
 
-            
-            Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
+            int hx = Mathf.FloorToInt(hPoint.x);
+            int hz = Mathf.FloorToInt(hPoint.z);
+            int hy = Mathf.FloorToInt(hPoint.y);
+
+            //Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
             if (y >= height)
             {
                 // restrict y based off our predetermined height 
@@ -110,9 +117,9 @@ public class Grid : MonoBehaviour
             }
         
             validHover = true;
+            
+            currentPos = new Vector3(x + voxelParent.transform.position.x, y + voxelParent.transform.position.y, z + voxelParent.transform.position.z);
             tool.StartPreview(currentPos);
-            currentPos = new Vector3(x + voxelParent.transform.position.x, voxelParent.transform.position.y, z + voxelParent.transform.position.z);
-
             return currentPos;
         } else
         {
@@ -162,7 +169,7 @@ public class Grid : MonoBehaviour
             {
                 isDragging = true;
                 DrawVoxel(GetGridPosition(point));
-                //Debug.Log("MouseDown:" + point);
+                Debug.Log("MouseDown:" + GetGridPosition(point));
             }
             else if (Input.GetMouseButtonUp(0))
             {
@@ -172,7 +179,7 @@ public class Grid : MonoBehaviour
             if (isDragging)
             {
                 //Debug.Log("point on drag:" + point);
-                DrawVoxel(GetGridPosition(point));
+                //DrawVoxel(GetGridPosition(point));
             }
         }
     }

@@ -31,6 +31,11 @@ public class Tool
         activeTool = tool;
     }
 
+    public void SetParent(GameObject vParent)
+    {
+        AddPreview.transform.SetParent(vParent.transform);
+    }
+
     // Handles the voxel creator preview for the active tool
     public void StartPreview(Vector3 pos)
     {
@@ -40,24 +45,24 @@ public class Tool
             return;
         }
         currentPosition = pos;
-
+        Debug.Log("position:" + pos);
         switch (activeTool)
         {
             case Tools.Add:
                 AddPreview.SetActive(true);
-                AddPreview.transform.position = pos + new Vector3(0.5f, 0.5f, 0.5f);
+                AddPreview.transform.localPosition = pos + new Vector3(0.5f, 0.5f, 0.5f);
                 break;
             default:
                 Debug.Log("Default preview");
                 AddPreview.SetActive(true);
-                AddPreview.transform.position = pos + new Vector3(0.5f, 0.5f, 0.5f);
+                AddPreview.transform.localPosition = pos + new Vector3(0.5f, 0.5f, 0.5f);
                 break;
         }
     }
 
     public void StopPreview()
     {
-        Debug.Log("FALSE");
+        //Debug.Log("FALSE");
         switch (activeTool)
         {
             case Tools.Add:

@@ -119,13 +119,13 @@ public class CreationEditor : MonoBehaviour
         gridScript = grid.AddComponent<Grid>();
         gridScript.mat = gridMat;
         gridScript.CreateVoxel = voxelScript;
-        gridScript.Init();
 
         GameObject gridTransform = new GameObject("GridTransform");
+        gridScript.Init(gridTransform);
         grid.transform.SetParent(gridTransform.transform);
         voxelCreator.transform.SetParent(grid.transform);
         gridScript.creatorCamera = CreatorCamera;
-        gridScript.voxelParent = gridTransform;
+        //gridScript.voxelParent = gridTransform;
 
         gridScript.transform.position = new Vector3(-8, 0, -8);
         gridTransform.transform.position = new Vector3(8, 0, 8);
