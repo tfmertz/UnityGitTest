@@ -17,7 +17,9 @@ public class CreateVoxel : MonoBehaviour
 
     public Grid Grid { set { grid = value; } }
 
-    List<Voxel> currentVoxels = new List<Voxel>();
+    Mesh currentMesh;
+    int[,,] currentVoxelMap;
+    bool isPreview;
 
     // Stores information about where our voxels are in the current grid
     // Each CreateVoxel (or Layer) will have one to store info to quickly
@@ -25,6 +27,8 @@ public class CreateVoxel : MonoBehaviour
     // index inside the currentVoxel List for easy reverse lookup.
     int[,,] voxelMap;
 
+
+    List<Voxel> currentVoxels = new List<Voxel>();
     public List<Voxel> CurrentVoxels { get { return currentVoxels; } }
 
     // Start is called before the first frame update
@@ -91,7 +95,7 @@ public class CreateVoxel : MonoBehaviour
         });
         voxelMap[(int)position.x, (int)position.y, (int)position.z] = currentVoxels.Count - 1;
 
-        CreateVoxelMesh();
+        CreateVoxelMesh(currentVoxels.ToArray());
     }
 
     public void Undo()
@@ -121,14 +125,50 @@ public class CreateVoxel : MonoBehaviour
     {
         // Reset our position map before load
         CreateVoxelMap();
+        currentVoxels.Clear();
 
         for (int i = 0; i < voxels.Length; i++)
         {
-            // TODO Create is less efficient because it needs to recreate the voxel mesh
-            // for each new voxel as it's meant to add to an existing voxel mesh, but with load we know all
-            // the voxel positions to start, so we can add them all to the voxelMap and then create the mesh once
-            Create(voxels[i].position);
+            Vector3 position = voxels[i].position;
+            currentVoxels.Add(new Voxel
+            {
+                position = position,
+                color = voxels[i].color,
+            });
+            voxelMap[(int)position.x, (int)position.y, (int)position.z] = i;
         }
+
+        // Once our currentVoxels and voxelMap is populated, we can create the mesh
+        CreateVoxelMesh(currentVoxels.ToArray());
+    }
+
+    // Allows tools to manipulate the current voxels for the purpose
+    // of displaying previews, but doesn't actually affect the current mesh
+    // or collider
+    public void Preview(Voxel[] voxels)
+    {
+        isPreview = true;
+        // Reset the voxelMap
+        CreateVoxelMap();
+        // Add in our preview voxels
+        for (int i = 0; i < voxels.Length; i++)
+        {
+            Vector3 position = voxels[i].position;
+            voxelMap[(int)position.x, (int)position.y, (int)position.z] = i;
+        }
+        CreateVoxelMesh(voxels);
+    }
+
+    public void StopPreview()
+    {
+        meshFilter.mesh = currentMesh;
+        voxelMap = currentVoxelMap;
+        isPreview = false;
+    }
+
+    public int GetVoxelFromPosition(Vector3 pos)
+    {
+        return voxelMap[(int)pos.x, (int)pos.y, (int)pos.z];
     }
 
     /// <summary>
@@ -136,15 +176,16 @@ public class CreateVoxel : MonoBehaviour
     /// and adds each of their faces that aren't shared by another voxel. Then
     /// it saves all the vertices, triangles, and uvs into a unity mesh
     /// </summary>
-    void CreateVoxelMesh()
+    void CreateVoxelMesh(Voxel[] voxels)
     {
         int vertIndex = 0;
         List<Vector3> verts = new List<Vector3>();
         List<int> tris = new List<int>();
         List<Vector2> uvs = new List<Vector2>();
+        List<Color> colors = new List<Color>();
 
         // Go through each voxel in our current voxels
-        for (int k = 0; k < currentVoxels.Count; k++)
+        for (int k = 0; k < voxels.Length; k++)
         {
             // Go through each of the faces of that voxel
             // When creating a voxel face we need to go through the VoxelData.faceVertices
@@ -152,7 +193,8 @@ public class CreateVoxel : MonoBehaviour
             // to the correct position for our mesh's vertices.
             for (int j = 0; j < 6; j++)
             {
-                Vector3 pos = currentVoxels[k].position;
+                Vector3 pos = voxels[k].position;
+                Color color = voxels[k].color;
                 // Check if the face we are creating has a voxel at that position already
                 if (!CheckVoxelMap(pos + VoxelData.faceChecks[j]))
                 {
@@ -160,6 +202,7 @@ public class CreateVoxel : MonoBehaviour
                     {
                         int triIndex = VoxelData.faceVertices[j, i];
                         verts.Add(VoxelData.vertices[triIndex] + pos);
+                        colors.Add(color);
 
                         if (i == 3)
                         {
@@ -185,6 +228,7 @@ public class CreateVoxel : MonoBehaviour
             vertices = verts.ToArray(),
             triangles = tris.ToArray(),
             uv = uvs.ToArray(),
+            colors = colors.ToArray(),
         };
         mesh.RecalculateNormals();
 
@@ -192,6 +236,11 @@ public class CreateVoxel : MonoBehaviour
         meshRenderer.material = mat;
 
         // Set the collider to be the mesh
-        meshCollider.sharedMesh = mesh;
+        if (!isPreview)
+        {
+            currentMesh = mesh;
+            currentVoxelMap = (int[,,]) voxelMap.Clone();
+            meshCollider.sharedMesh = mesh;
+        }
     }
 }
