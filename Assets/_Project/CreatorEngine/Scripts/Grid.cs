@@ -99,6 +99,7 @@ public class Grid : MonoBehaviour
         {
             validHover = false;
             tool.StopPreview();
+            tool.Apply();
         }
         return Vector3.zero;
     }
