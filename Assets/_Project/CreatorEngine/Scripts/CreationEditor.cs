@@ -138,6 +138,7 @@ public class CreationEditor : MonoBehaviour
 
         touchController = gameObject.AddComponent<TouchController>();
         touchController.camera = CreatorCamera;
+        touchController.theGrid = gridScript;
         touchController.SpinableObject = CreatorCamera.transform.parent.gameObject;
         touchController.SpinableObject.transform.position = gridTransform.transform.position;
     }
