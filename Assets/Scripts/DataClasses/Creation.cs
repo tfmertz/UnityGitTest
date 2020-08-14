@@ -15,4 +15,5 @@ public class Creation
 public class Voxel
 {
     public Vector3 position;
+    public Color color;
 }

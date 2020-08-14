@@ -96,11 +96,12 @@ public class CreationEditor : MonoBehaviour
         // Get needed materials
         Material gridMat = Resources.Load<Material>("Grid");
         Material test = Resources.Load<Material>("Test");
+        Material voxel = Resources.Load<Material>("Voxel");
 
         // Create grid and voxel creator
         GameObject voxelCreator = new GameObject("VoxelCreator");
         CreateVoxel voxelScript = voxelCreator.AddComponent<CreateVoxel>();
-        voxelScript.mat = test;
+        voxelScript.mat = voxel;
 
         grid = new GameObject("Grid");
         gridScript = grid.AddComponent<Grid>();

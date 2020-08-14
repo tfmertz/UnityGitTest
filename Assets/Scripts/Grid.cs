@@ -69,7 +69,7 @@ public class Grid : MonoBehaviour
             int x = Mathf.FloorToInt(hit.point.x);
             int z = Mathf.FloorToInt(hit.point.z);
             int y = Mathf.FloorToInt(hit.point.y);
-            Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
+            //Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
             if (y >= height)
             {
                 // restrict y based off our predetermined height 
@@ -111,7 +111,8 @@ public class Grid : MonoBehaviour
     {
         if (Input.GetButtonDown("Fire1") && validHover)
         {
-            createVoxel.Create(currentPos);
+            tool.StopPreview();
+            tool.Apply();
         }
     }
 

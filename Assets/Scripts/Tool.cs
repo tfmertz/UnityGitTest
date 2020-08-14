@@ -38,6 +38,12 @@ public class Tool
         {
             // bail out if the position didn't change
             return;
+        } else
+        {
+            if (activeTool == Tools.Delete)
+            {
+                StopPreview();
+            }
         }
         currentPosition = pos;
 
@@ -46,6 +52,19 @@ public class Tool
             case Tools.Add:
                 AddPreview.SetActive(true);
                 AddPreview.transform.position = pos + new Vector3(0.5f, 0.5f, 0.5f);
+                break;
+            case Tools.Delete:
+                // Remove the voxel at the current position for the preview
+                Debug.Log($"Delete at {pos}");
+                int voxelIndex = currentVoxelCreator.GetVoxelFromPosition(pos);
+                if (voxelIndex == -1)
+                {
+                    // bail if there's no voxel there
+                    return;
+                }
+                List<Voxel> previewVoxels = new List<Voxel>(currentVoxelCreator.CurrentVoxels);
+                previewVoxels.RemoveAt(voxelIndex);
+                currentVoxelCreator.Preview(previewVoxels.ToArray());
                 break;
             default:
                 Debug.Log("Default preview");
@@ -63,6 +82,9 @@ public class Tool
             case Tools.Add:
                 AddPreview.SetActive(false);
                 break;
+            case Tools.Delete:
+                currentVoxelCreator.StopPreview();
+                break;
             default:
                 Debug.Log("Default preview");
                 break;
@@ -72,7 +94,28 @@ public class Tool
     // Handles updating the voxel creation when a tool is used
     public void Apply()
     {
+        switch(activeTool)
+        {
+            case Tools.Add:
+                // TODO take the logic out of the createvoxel and add it to the tool to manage
+                // CreateVoxel should be an API the tools use to manipulate the mesh
+                currentVoxelCreator.Create(currentPosition);
+                break;
+            case Tools.Delete:
+                int voxelIndex = currentVoxelCreator.GetVoxelFromPosition(currentPosition);
+                if (voxelIndex == -1)
+                {
+                    return;
+                }
 
+                List<Voxel> voxels = new List<Voxel>(currentVoxelCreator.CurrentVoxels);
+                voxels.RemoveAt(voxelIndex);
+                currentVoxelCreator.Load(voxels.ToArray());
+                break;
+            default:
+                Debug.Log("No tools matches to apply");
+                break;
+        }
     }
 
     public void Cleanup()
