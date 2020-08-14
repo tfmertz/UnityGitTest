@@ -51,7 +51,7 @@ public class Tool
             }
         }
         currentPosition = pos;
-        Debug.Log("position:" + pos);
+
         switch (activeTool)
         {
             case Tools.Add:
@@ -60,13 +60,14 @@ public class Tool
                 break;
             case Tools.Delete:
                 // Remove the voxel at the current position for the preview
-                Debug.Log($"Delete at {pos}");
+                
                 int voxelIndex = currentVoxelCreator.GetVoxelFromPosition(pos);
                 if (voxelIndex == -1)
                 {
                     // bail if there's no voxel there
                     return;
                 }
+                Debug.Log($"Delete at {pos}");
                 List<Voxel> previewVoxels = new List<Voxel>(currentVoxelCreator.CurrentVoxels);
                 previewVoxels.RemoveAt(voxelIndex);
                 currentVoxelCreator.Preview(previewVoxels.ToArray());
@@ -110,6 +111,7 @@ public class Tool
                 int voxelIndex = currentVoxelCreator.GetVoxelFromPosition(currentPosition);
                 if (voxelIndex == -1)
                 {
+                    Debug.Log($"Bailing for {currentPosition}");
                     return;
                 }
 

@@ -36,7 +36,7 @@ public class Grid : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        //HandleHover();
+        HandleHover();
     }
 
     void CreateGroundPlane()
@@ -130,6 +130,7 @@ public class Grid : MonoBehaviour
     {
         if (validHover)
         {
+            tool.StopPreview();
             tool.Apply();
         }
     }
