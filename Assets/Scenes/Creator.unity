@@ -199,6 +199,36 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 19459615}
   m_CullTransparentMesh: 0
+--- !u!1 &291315820
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 291315821}
+  m_Layer: 0
+  m_Name: CameraGimbal
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &291315821
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 291315820}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 4.2289133, y: 1.5847573, z: 1.3406522}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &512333154
 GameObject:
   m_ObjectHideFlags: 0
@@ -1034,7 +1064,43 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    - target: {fileID: 744875910312439686, guid: c62e7bc71370e42aea4ea8bcdb7a2c7d,
+        type: 3}
+      propertyPath: field of view
+      value: 20
+      objectReference: {fileID: 0}
+    - target: {fileID: 5804112856006146596, guid: c62e7bc71370e42aea4ea8bcdb7a2c7d,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5804112856006146596, guid: c62e7bc71370e42aea4ea8bcdb7a2c7d,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5804112856006146596, guid: c62e7bc71370e42aea4ea8bcdb7a2c7d,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5804112856006146596, guid: c62e7bc71370e42aea4ea8bcdb7a2c7d,
+        type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5804112856006146596, guid: c62e7bc71370e42aea4ea8bcdb7a2c7d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5804112856006146596, guid: c62e7bc71370e42aea4ea8bcdb7a2c7d,
+        type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents:
+    - {fileID: 3023372304024863364, guid: c62e7bc71370e42aea4ea8bcdb7a2c7d, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: c62e7bc71370e42aea4ea8bcdb7a2c7d, type: 3}
 --- !u!114 &1024406718 stripped
 MonoBehaviour:

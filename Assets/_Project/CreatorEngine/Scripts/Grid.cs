@@ -69,7 +69,7 @@ public class Grid : MonoBehaviour
     {
         // Raycast from mouse to detect hover
         RaycastHit hit;
-        if (Physics.Raycast(creatorCamera.ScreenPointToRay(Input.mousePosition), out hit, 300.0f))
+        if (Physics.Raycast(creatorCamera.ScreenPointToRay(point), out hit, 300.0f))
         {
             Vector3 hPoint = voxelParent.transform.InverseTransformPoint(hit.point);
 
