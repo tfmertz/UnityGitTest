@@ -31,7 +31,7 @@ public class TouchController : MonoBehaviour
         Vector2 deltaPositon = Vector2.zero;
 
         Vector3 point = Vector3.zero;
-
+        theGrid.GetGridPosition(Input.mousePosition);
         if (Input.touchCount > 0)
         {
             point = HandleTouch();
