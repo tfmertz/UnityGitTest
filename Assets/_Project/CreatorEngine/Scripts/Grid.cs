@@ -36,7 +36,7 @@ public class Grid : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        HandleHover();
+        //HandleHover();
     }
 
     void CreateGroundPlane()
@@ -99,7 +99,6 @@ public class Grid : MonoBehaviour
         {
             validHover = false;
             tool.StopPreview();
-            tool.Apply();
         }
         return Vector3.zero;
     }
@@ -129,7 +128,10 @@ public class Grid : MonoBehaviour
 
     public void DrawVoxel(Vector3 p)
     {
-        if (validHover) createVoxel.Create(p);
+        if (validHover)
+        {
+            tool.Apply();
+        }
     }
 
     public void DrawVoxelOnMouseDown(Vector3 point)
