@@ -15,7 +15,7 @@ public class Grid : MonoBehaviour
 
     GameObject ground;
     Vector3 currentPos;
-    bool validHover;
+    public bool validHover;
     Tool tool;
 
     private Touch theTouch;
@@ -31,12 +31,6 @@ public class Grid : MonoBehaviour
         voxelParent = vParent;
         tool = new Tool(createVoxel);
         tool.SetParent(gameObject);
-    }
-
-
-    private void Update()
-    {
-        HandleInput();
     }
 
     // Update is called once per frame
@@ -84,10 +78,6 @@ public class Grid : MonoBehaviour
             int z = Mathf.FloorToInt(hPoint.z);
             int y = Mathf.FloorToInt(hPoint.y);
 
-            int hx = Mathf.FloorToInt(hPoint.x);
-            int hz = Mathf.FloorToInt(hPoint.z);
-            int hy = Mathf.FloorToInt(hPoint.y);
-
             //Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
             if (y >= height)
             {
@@ -97,31 +87,15 @@ public class Grid : MonoBehaviour
             // In case we accidentally get a tiny number smaller than 0
             if (y < 0) y = 0;
 
-            // Check normals for adding on sides
-            if (tool.activeTool == Tool.Tools.Add)
-            {
-                if (hit.normal.Equals(Vector3.right) || hit.normal.Equals(-Vector3.right))
-                {
-                    x += (int) hit.normal.x;
-                } else if(hit.normal.Equals(Vector3.forward) || hit.normal.Equals(-Vector3.forward))
-                {
-                    z += (int) hit.normal.z;
-                }
-            }
-            else if (tool.activeTool == Tool.Tools.Delete)
-            {
-                if (hit.normal.Equals(Vector3.up) && y > 0)
-                {
-                    y--;
-                }
-            }
-        
+            CheckNormalsForSides(hit, ref x, ref z, ref y);
+
             validHover = true;
-            
+
             currentPos = new Vector3(x + voxelParent.transform.position.x, y + voxelParent.transform.position.y, z + voxelParent.transform.position.z);
             tool.StartPreview(currentPos);
             return currentPos;
-        } else
+        }
+        else
         {
             validHover = false;
             tool.StopPreview();
@@ -129,59 +103,39 @@ public class Grid : MonoBehaviour
         return Vector3.zero;
     }
 
-    void DrawVoxel(Vector3 p)
+    private void CheckNormalsForSides(RaycastHit hit, ref int x, ref int z, ref int y)
+    {
+        // Check normals for adding on sides
+        if (tool.activeTool == Tool.Tools.Add)
+        {
+            if (hit.normal.Equals(Vector3.right) || hit.normal.Equals(-Vector3.right))
+            {
+                x += (int)hit.normal.x;
+            }
+            else if (hit.normal.Equals(Vector3.forward) || hit.normal.Equals(-Vector3.forward))
+            {
+                z += (int)hit.normal.z;
+            }
+        }
+        else if (tool.activeTool == Tool.Tools.Delete)
+        {
+            if (hit.normal.Equals(Vector3.up) && y > 0)
+            {
+                y--;
+            }
+        }
+    }
+
+    public void DrawVoxel(Vector3 p)
     {
         if (validHover) createVoxel.Create(p);
     }
 
-    void HandleInput()
+    public void DrawVoxelOnMouseDown(Vector3 point)
     {
-        Vector3 point = new Vector3();
-        point = Input.mousePosition;
-        if (Input.touchCount > 0)
-        {
-            theTouch = Input.GetTouch(0);
-
-            if (theTouch.phase == TouchPhase.Began)
-            {
-                isDragging = true;
-                //Debug.Log("Touch began:" + point);
-                DrawVoxel(GetGridPosition(theTouch.position));
-
-            }
-
-            else if (theTouch.phase == TouchPhase.Moved)
-            {
-                isDragging = true;
-                //Debug.Log("Touch Moved:" + point);
-                DrawVoxel(GetGridPosition(theTouch.position));
-
-            }
-            else if (theTouch.phase == TouchPhase.Ended)
-            {
-                isDragging = false;
-            }
-            point = Input.mousePosition;
-        }
-        else
-        {
-            if (Input.GetMouseButtonDown(0))
-            {
-                isDragging = true;
-                DrawVoxel(GetGridPosition(point));
-                Debug.Log("MouseDown:" + GetGridPosition(point));
-            }
-            else if (Input.GetMouseButtonUp(0))
-            {
-                isDragging = false;
-            }
-
-            if (isDragging)
-            {
-                //Debug.Log("point on drag:" + point);
-                //DrawVoxel(GetGridPosition(point));
-            }
-        }
+       
+        DrawVoxel(GetGridPosition(point));
+            
     }
 
     // Clean up the voxelCreator script and hoverPreview
