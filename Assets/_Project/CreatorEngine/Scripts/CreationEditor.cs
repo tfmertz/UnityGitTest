@@ -19,6 +19,7 @@ public class CreationEditor : MonoBehaviour
     GameObject grid;
     Grid gridScript;
 
+    TouchController touchController;
     public void CreateNew(string name)
     {
         currentCreation = new Creation
@@ -127,10 +128,17 @@ public class CreationEditor : MonoBehaviour
         gridScript.creatorCamera = CreatorCamera;
         //gridScript.voxelParent = gridTransform;
 
-        gridScript.transform.position = new Vector3(-8, 0, -8);
-        gridTransform.transform.position = new Vector3(8, 0, 8);
+        var w = gridScript.width;
+        var h = gridScript.height;
+        gridScript.transform.position = new Vector3(w/2*-1, 0, w/2*-1);
+        gridTransform.transform.position = new Vector3(w/2, 0, w/2);
 
         gridTransform.transform.SetParent(this.transform);
         voxelScript.Grid = gridScript;
+
+        touchController = gameObject.AddComponent<TouchController>();
+        touchController.camera = CreatorCamera;
+        touchController.SpinableObject = CreatorCamera.transform.parent.gameObject;
+        touchController.SpinableObject.transform.position = gridTransform.transform.position;
     }
 }
