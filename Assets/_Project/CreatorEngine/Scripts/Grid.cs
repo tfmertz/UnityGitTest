@@ -62,14 +62,14 @@ public class Grid : MonoBehaviour
 
     void HandleHover()
     {
-        //GetGridPosition(Input.mousePosition);
+        GetGridPosition(Input.mousePosition);
     }
 
-    public Vector3 GetGridPosition(Vector3 point)
+    private Vector3 GetGridPosition(Vector3 point)
     {
         // Raycast from mouse to detect hover
         RaycastHit hit;
-        if (Physics.Raycast(creatorCamera.ScreenPointToRay(point), out hit, 300.0f))
+        if (Physics.Raycast(creatorCamera.ScreenPointToRay(Input.mousePosition), out hit, 300.0f))
         {
             Vector3 hPoint = voxelParent.transform.InverseTransformPoint(hit.point);
 
@@ -99,7 +99,6 @@ public class Grid : MonoBehaviour
         {
             validHover = false;
             tool.StopPreview();
-           
         }
         return Vector3.zero;
     }
@@ -129,7 +128,10 @@ public class Grid : MonoBehaviour
 
     public void DrawVoxel(Vector3 p)
     {
-        if (validHover)  tool.Apply();
+        if (validHover)
+        {
+            tool.Apply();
+        }
     }
 
     public void DrawVoxelOnMouseDown(Vector3 point)
