@@ -16,4 +16,13 @@ public class Voxel
 {
     public Vector3 position;
     public Color color;
+
+    public Voxel Clone()
+    {
+        return new Voxel
+        {
+            position = this.position,
+            color = this.color,
+        };
+    }
 }
