@@ -12,6 +12,8 @@ public class Tool
     Vector3 currentPosition;
     Vector3 lastPosition;
 
+    Color color = Color.red;
+
     public Tool(CreateVoxel createVoxel)
     {
         currentVoxelCreator = createVoxel;
@@ -45,13 +47,13 @@ public class Tool
             return;
         } else
         {
-            if (activeTool == Tools.Delete)
+            if (activeTool == Tools.Delete || activeTool == Tools.Paint)
             {
                 StopPreview();
             }
         }
         currentPosition = pos;
-        Debug.Log("position:" + pos);
+
         switch (activeTool)
         {
             case Tools.Add:
@@ -60,17 +62,34 @@ public class Tool
                 break;
             case Tools.Delete:
                 // Remove the voxel at the current position for the preview
-                Debug.Log($"Delete at {pos}");
+                
                 int voxelIndex = currentVoxelCreator.GetVoxelFromPosition(pos);
                 if (voxelIndex == -1)
                 {
                     // bail if there's no voxel there
                     return;
                 }
+                Debug.Log($"Delete at {pos}");
                 List<Voxel> previewVoxels = new List<Voxel>(currentVoxelCreator.CurrentVoxels);
                 previewVoxels.RemoveAt(voxelIndex);
                 currentVoxelCreator.Preview(previewVoxels.ToArray());
                 break;
+            case Tools.Paint:
+                int index = currentVoxelCreator.GetVoxelFromPosition(pos);
+                if (index == -1)
+                {
+                    return;
+                }
+                // Deep copy the current array so we can change colors
+                List<Voxel> voxels = new List<Voxel>();
+                for (int i = 0; i < currentVoxelCreator.CurrentVoxels.Count; i++)
+                {
+                    voxels.Add(currentVoxelCreator.CurrentVoxels[i].Clone());
+                }
+                voxels[index].color = color;
+                currentVoxelCreator.Preview(voxels.ToArray());
+                break;
+
             default:
                 Debug.Log("Default preview");
                 AddPreview.SetActive(true);
@@ -81,13 +100,15 @@ public class Tool
 
     public void StopPreview()
     {
-        //Debug.Log("FALSE");
         switch (activeTool)
         {
             case Tools.Add:
                 AddPreview.SetActive(false);
                 break;
             case Tools.Delete:
+                currentVoxelCreator.StopPreview();
+                break;
+            case Tools.Paint:
                 currentVoxelCreator.StopPreview();
                 break;
             default:
@@ -110,12 +131,24 @@ public class Tool
                 int voxelIndex = currentVoxelCreator.GetVoxelFromPosition(currentPosition);
                 if (voxelIndex == -1)
                 {
+                    Debug.Log($"Bailing for {currentPosition}");
                     return;
                 }
 
                 List<Voxel> voxels = new List<Voxel>(currentVoxelCreator.CurrentVoxels);
                 voxels.RemoveAt(voxelIndex);
                 currentVoxelCreator.Load(voxels.ToArray());
+                break;
+            case Tools.Paint:
+                int index = currentVoxelCreator.GetVoxelFromPosition(currentPosition);
+                if (index == -1)
+                {
+                    Debug.Log($"Bailing for {currentPosition}");
+                    return;
+                }
+
+                currentVoxelCreator.CurrentVoxels[index].color = color;
+                currentVoxelCreator.Load(currentVoxelCreator.CurrentVoxels.ToArray());
                 break;
             default:
                 Debug.Log("No tools matches to apply");
