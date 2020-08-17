@@ -2,27 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Houses the data associated with a Creation inside the creation tool
-/// </summary>
-public class Creation
+namespace Arkh.CreatorEngine
 {
-    public string name;
-    public Voxel[] voxels;
-}
-
-[System.Serializable]
-public class Voxel
-{
-    public Vector3 position;
-    public Color color;
-
-    public Voxel Clone()
+    /// <summary>
+    /// Houses the data associated with a Creation inside the creation tool
+    /// </summary>
+    public class Creation
     {
-        return new Voxel
+        public string name;
+        public Voxel[] voxels;
+    }
+
+    [System.Serializable]
+    public class Voxel
+    {
+        public Vector3 position;
+        public Color color;
+
+        public Voxel Clone()
         {
-            position = this.position,
-            color = this.color,
-        };
+            return new Voxel
+            {
+                position = this.position,
+                color = this.color,
+            };
+        }
     }
 }
