@@ -63,7 +63,7 @@ namespace Arkh.CreatorEngine
         {
             Creation creation = currentCreation;
             gridScript.ChangeGridSize(w, h);
-           // RepositionGrid(w, h);
+            RepositionGrid(w, h);
         }
 
         public void Save()
@@ -140,7 +140,7 @@ namespace Arkh.CreatorEngine
 
             var w = gridScript.width;
             var h = gridScript.height;
-            RepositionGrid(w, h);
+            
 
             gridTransform.transform.SetParent(this.transform);
             voxelScript.Grid = gridScript;
@@ -148,20 +148,23 @@ namespace Arkh.CreatorEngine
             touchController = gameObject.AddComponent<TouchController>();
             touchController.camera = CreatorCamera;
             touchController.theGrid = gridScript;
-            touchController.SpinableObjectY = CreatorCamera.transform.parent.gameObject;
-            //  touchController.SpinableObjectX = CreatorCamera.transform.parent.gameObject;
+            touchController.SpinableObjectGimbal = CreatorCamera.transform.parent.gameObject;
+            // touchController.SpinableObjectX = CreatorCamera.transform.parent.gameObject;
             // change this for old way of rotation
-            touchController.SpinableObjectX = gridTransform;
-            touchController.SpinableObjectY.transform.position = gridTransform.transform.position;
+            touchController.SpinableObjectGrid = gridTransform;
+            touchController.SpinableObjectGrid.transform.position = gridTransform.transform.position;
 
             touchController.camera.transform.localPosition = new Vector3(0, 0, -79);
-            touchController.SpinableObjectY.transform.rotation = Quaternion.Euler(30, 45, 0);
+            touchController.SpinableObjectGimbal.transform.rotation = Quaternion.Euler(30, 45, 0);
+            RepositionGrid(w, h);
         }
 
         private void RepositionGrid(int w, int h)
         {
-            gridScript.transform.position = new Vector3(w / 2 * -1, 0, h / 2 * -1);
+            gridScript.transform.localPosition = new Vector3(w / 2 * -1, 0, h / 2 * -1);
             gridScript.gameObject.transform.parent.transform.position = new Vector3(w / 2, 0, h / 2);
+            if(touchController)
+                touchController.SpinableObjectGimbal.transform.position = new Vector3(w / 2, 0, h / 2);
         }
 
     }
