@@ -35,7 +35,7 @@ namespace Arkh.CreatorEngine
 
         public void Undo()
         {
-            UndoAction.UndoList[0].Undo();
+            UndoAction.Undo();
             //gridScript.Undo();
         }
         public void Load()
@@ -147,13 +147,14 @@ namespace Arkh.CreatorEngine
             voxelScript.Grid = gridScript;
 
             touchController = gameObject.AddComponent<TouchController>();
-            touchController.camera = CreatorCamera;
+            touchController.TheCamera = CreatorCamera;
             touchController.theGrid = gridScript;
             touchController.SpinableObject = CreatorCamera.transform.parent.gameObject;
             touchController.SpinableObject.transform.position = gridTransform.transform.position;
 
-            touchController.camera.transform.localPosition = new Vector3(0, 0, -79);
-            touchController.SpinableObject.transform.rotation = Quaternion.Euler(30, 45, 0);
+            UndoAction.CurrentCameraPosition = touchController.TheCamera.transform.localPosition = touchController.StartZoomPosition;
+            UndoAction.CurrentGimbalRotation = touchController.SpinableObject.transform.rotation = touchController.StartSpinPosition;
+            Debug.Log("cam start:" + UndoAction.CurrentCameraPosition);
             ResetGridTransform(w, h);
         }
 
@@ -170,70 +171,9 @@ namespace Arkh.CreatorEngine
         {
             if (touchController)
             {
-                touchController.camera.transform.localPosition = new Vector3(0, 0, -79);
+                touchController.TheCamera.transform.localPosition = new Vector3(0, 0, -79);
                 touchController.SpinableObject.transform.rotation = Quaternion.Euler(30, 45, 0);
             }
-        }
-    }
-    public class UndoAction {
-        public static List<UndoAction> UndoList;
-        public static bool isBuilt = false;
-        //
-        private Type action;
-        public Camera Camera;
-        public Transform CameraTransform;
-        public GameObject Gimbal;
-        public Quaternion GimbalTransform;
-        public delegate void CallDelegate();
-        public delegate void CallDelegateTranslate(Transform t, Transform r);
-        public CallDelegate MethodCall;
-
-        public CallDelegateTranslate MethodCallTranslate;
-
-        public enum Type {ROTATE, ADD, DELETE, COLOR};
-        
-        public UndoAction(Type CameraAction, Camera Camera, GameObject Gimbal)
-        {
-            action = CameraAction;
-
-            this.Camera = Camera;
-            CameraTransform = Camera.transform;
-            this.Gimbal = Gimbal;
-            GimbalTransform = Gimbal.transform.rotation;
-            AddToList();
-        }
-        public UndoAction(Type CreationAction, CallDelegate Method)
-        {
-            action = CreationAction;
-            this.MethodCall = Method;
-            AddToList();
-        }
-        public void Undo()
-        {
-            Debug.Log(action);
-            switch (action) {
-                case Type.ADD:
-                    MethodCall();
-                    break;
-                case Type.ROTATE:
-                    Gimbal.transform.rotation = GimbalTransform;
-                    Debug.Log("Gimbal End:"+GimbalTransform);
-                    break;
-            }
-            UndoList.RemoveAt(UndoList.Count - 1);
-            Debug.Log("List Size" + UndoAction.UndoList.Count);
-        }
-        public void AddToList()
-        {
-           
-            if (!isBuilt)
-            {
-                UndoAction.UndoList = new List<UndoAction>(); Debug.Log("new list");
-                isBuilt = true;
-            }
-            
-            UndoAction.UndoList.Add(this);
-            Debug.Log("List Size" + UndoAction.UndoList.Count);
         }
     }
 }
