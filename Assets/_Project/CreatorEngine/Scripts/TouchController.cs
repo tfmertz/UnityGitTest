@@ -52,6 +52,7 @@ namespace Arkh.CreatorEngine
                     mouseDown = true;
                     isDragging = true;
                     theGrid.DrawVoxelOnMouseDown(Input.mousePosition);
+                    new UndoAction(UndoAction.Type.ROTATE, camera, SpinableObject);
                 }
             }
             else if (Input.GetMouseButtonUp(0))
@@ -142,12 +143,14 @@ namespace Arkh.CreatorEngine
 
         private void RotateObject()
         {
+
             float rotX = Input.GetAxis("Mouse X") * rotSpeed * Mathf.Deg2Rad;
             float rotY = Input.GetAxis("Mouse Y") * rotSpeed * Mathf.Deg2Rad;
 
             SpinableObject.transform.Rotate(Vector3.up, rotX, Space.World);
             SpinableObject.transform.Rotate(Vector3.right, -rotY, Space.Self);
-       
+
+            
         }
         private void Zoom(float deltaMagnitudeDiff)
         {
@@ -155,7 +158,7 @@ namespace Arkh.CreatorEngine
             if (!camera) camera = GetComponent<Camera>();
             float cameraZ = camera.transform.gameObject.transform.localPosition.z;
             cameraZ += deltaMagnitudeDiff * CameraZoomSpeedWheel;
-            Debug.Log(deltaMagnitudeDiff * CameraZoomSpeedOrtho);
+            //Debug.Log(deltaMagnitudeDiff * CameraZoomSpeedOrtho);
             camera.transform.localPosition = new Vector3(0, 0, cameraZ);
         }
     }

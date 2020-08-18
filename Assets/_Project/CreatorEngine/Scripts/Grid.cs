@@ -141,6 +141,7 @@ namespace Arkh.CreatorEngine
             {
                 tool.StopPreview();
                 tool.Apply();
+                new UndoAction(UndoAction.Type.ADD, Undo);
             }
         }
 

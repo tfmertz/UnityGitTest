@@ -13,7 +13,7 @@ namespace Arkh.CreatorEngine
     {
         Creation currentCreation;
         List<Voxel> currentVoxels;
-
+        
         // External references
         public Camera CreatorCamera;
 
@@ -35,7 +35,8 @@ namespace Arkh.CreatorEngine
 
         public void Undo()
         {
-            gridScript.Undo();
+            UndoAction.UndoList[0].Undo();
+            //gridScript.Undo();
         }
         public void Load()
         {
@@ -63,7 +64,7 @@ namespace Arkh.CreatorEngine
         {
             Creation creation = currentCreation;
             gridScript.ChangeGridSize(w, h);
-            ResetGrid(w, h);
+            ResetGridTransform(w, h);
         }
 
         public void Save()
@@ -140,8 +141,8 @@ namespace Arkh.CreatorEngine
 
             var w = gridScript.width;
             var h = gridScript.height;
-            ResetGrid(w, h);
-             
+
+
             gridTransform.transform.SetParent(this.transform);
             voxelScript.Grid = gridScript;
 
@@ -153,15 +154,86 @@ namespace Arkh.CreatorEngine
 
             touchController.camera.transform.localPosition = new Vector3(0, 0, -79);
             touchController.SpinableObject.transform.rotation = Quaternion.Euler(30, 45, 0);
-            ResetGrid(w, h);
+            ResetGridTransform(w, h);
         }
 
-        private void ResetGrid(int w, int h)
+        private void ResetGridTransform(int w, int h)
         {
             gridScript.transform.localPosition = new Vector3(w / 2 * -1, 0, h / 2 * -1);
             gridScript.transform.parent.transform.position = new Vector3(w / 2, 0, h / 2);
             if (touchController)
                 touchController.SpinableObject.transform.localPosition = gridScript.transform.parent.transform.position;
+
+            // TODO: Clean up Voxels that exist outside.
+        }
+        public void ResetGridToCenter()
+        {
+            if (touchController)
+            {
+                touchController.camera.transform.localPosition = new Vector3(0, 0, -79);
+                touchController.SpinableObject.transform.rotation = Quaternion.Euler(30, 45, 0);
+            }
+        }
+    }
+    public class UndoAction {
+        public static List<UndoAction> UndoList;
+        public static bool isBuilt = false;
+        //
+        private Type action;
+        public Camera Camera;
+        public Transform CameraTransform;
+        public GameObject Gimbal;
+        public Quaternion GimbalTransform;
+        public delegate void CallDelegate();
+        public delegate void CallDelegateTranslate(Transform t, Transform r);
+        public CallDelegate MethodCall;
+
+        public CallDelegateTranslate MethodCallTranslate;
+
+        public enum Type {ROTATE, ADD, DELETE, COLOR};
+        
+        public UndoAction(Type CameraAction, Camera Camera, GameObject Gimbal)
+        {
+            action = CameraAction;
+
+            this.Camera = Camera;
+            CameraTransform = Camera.transform;
+            this.Gimbal = Gimbal;
+            GimbalTransform = Gimbal.transform.rotation;
+            AddToList();
+        }
+        public UndoAction(Type CreationAction, CallDelegate Method)
+        {
+            action = CreationAction;
+            this.MethodCall = Method;
+            AddToList();
+        }
+        public void Undo()
+        {
+            Debug.Log(action);
+            switch (action) {
+                case Type.ADD:
+                    MethodCall();
+                    break;
+                case Type.ROTATE:
+                    Gimbal.transform.rotation = GimbalTransform;
+                    Debug.Log("Gimbal End:"+GimbalTransform);
+                    break;
+            }
+            UndoList.RemoveAt(UndoList.Count - 1);
+            Debug.Log("List Size" + UndoAction.UndoList.Count);
+        }
+        public void AddToList()
+        {
+           
+            if (!isBuilt)
+            {
+                UndoAction.UndoList = new List<UndoAction>(); Debug.Log("new list");
+                isBuilt = true;
+            }
+            
+            UndoAction.UndoList.Add(this);
+            Debug.Log("List Size" + UndoAction.UndoList.Count);
         }
     }
 }
