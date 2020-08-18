@@ -6,8 +6,8 @@ namespace Arkh.CreatorEngine
 {
     public class TouchController : MonoBehaviour
     {
-        public GameObject SpinableObjectGrid;
-        public GameObject SpinableObjectGimbal;
+        public GameObject SpinableObject;
+        //public GameObject SpinableObjectGimbal;
         private Touch screenTouchOne;
         private Vector2 startPosition;
         public float SpinVelocity = 1;
@@ -145,8 +145,9 @@ namespace Arkh.CreatorEngine
             float rotX = Input.GetAxis("Mouse X") * rotSpeed * Mathf.Deg2Rad;
             float rotY = Input.GetAxis("Mouse Y") * rotSpeed * Mathf.Deg2Rad;
 
-            SpinableObjectGrid.transform.Rotate(Vector3.up, rotX);
-            SpinableObjectGimbal.transform.Rotate(Vector3.right, -rotY);
+            SpinableObject.transform.Rotate(Vector3.up, rotX, Space.World);
+            SpinableObject.transform.Rotate(Vector3.right, -rotY, Space.Self);
+       
         }
         private void Zoom(float deltaMagnitudeDiff)
         {
