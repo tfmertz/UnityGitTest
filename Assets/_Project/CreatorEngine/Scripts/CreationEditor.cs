@@ -63,6 +63,7 @@ namespace Arkh.CreatorEngine
         {
             Creation creation = currentCreation;
             gridScript.ChangeGridSize(w, h);
+           // RepositionGrid(w, h);
         }
 
         public void Save()
@@ -139,8 +140,7 @@ namespace Arkh.CreatorEngine
 
             var w = gridScript.width;
             var h = gridScript.height;
-            gridScript.transform.position = new Vector3(w / 2 * -1, 0, w / 2 * -1);
-            gridTransform.transform.position = new Vector3(w / 2, 0, w / 2);
+            RepositionGrid(w, h);
 
             gridTransform.transform.SetParent(this.transform);
             voxelScript.Grid = gridScript;
@@ -157,5 +157,12 @@ namespace Arkh.CreatorEngine
             touchController.camera.transform.localPosition = new Vector3(0, 0, -79);
             touchController.SpinableObjectY.transform.rotation = Quaternion.Euler(30, 45, 0);
         }
+
+        private void RepositionGrid(int w, int h)
+        {
+            gridScript.transform.position = new Vector3(w / 2 * -1, 0, h / 2 * -1);
+            gridScript.gameObject.transform.parent.transform.position = new Vector3(w / 2, 0, h / 2);
+        }
+
     }
 }
