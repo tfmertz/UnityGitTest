@@ -87,21 +87,28 @@ namespace Arkh.CreatorEngine
                 int z = Mathf.FloorToInt(hPoint.z);
                 int y = Mathf.FloorToInt(hPoint.y);
 
-                //Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
-                if (y >= height)
-                {
-                    // restrict y based off our predetermined height 
-                    y = height - 1;
-                }
-                // In case we accidentally get a tiny number smaller than 0
-                if (y < 0) y = 0;
-
+                // Adjust our position based on the tool type and then the local position
                 CheckNormalsForSides(hit, ref x, ref z, ref y);
-
-                validHover = true;
-
                 currentPos = new Vector3(x + voxelParent.transform.position.x, y + voxelParent.transform.position.y, z + voxelParent.transform.position.z);
-                tool.StartPreview(currentPos);
+
+                //Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
+                if (CheckValidGridPosition(currentPos))
+                {
+                    validHover = true;
+                    Debug.Log($"Valid position: {x}, {y}, {z}");
+                } else
+                {
+                    Debug.Log($"Invalid position: {x}, {y}, {z}");
+                    validHover = false;
+                    tool.StopPreview();
+                }
+
+                
+                if (validHover)
+                {
+                    
+                    tool.StartPreview(currentPos);
+                }
                 return currentPos;
             }
             else
@@ -148,7 +155,6 @@ namespace Arkh.CreatorEngine
         {
 
             DrawVoxel(GetGridPosition(point));
-
         }
 
         // Clean up the voxelCreator script and hoverPreview
@@ -177,6 +183,21 @@ namespace Arkh.CreatorEngine
         public void SwitchTool(Tool.Tools toolEnum)
         {
             tool.SwitchTool(toolEnum);
+        }
+
+        public bool CheckValidGridPosition(Vector3 point)
+        {
+            float y = point.y;
+            float x = point.x;
+            float z = point.z;
+            if (y < 0 || y >= height || x < 0 || x >= width || z < 0 || z >= width)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }

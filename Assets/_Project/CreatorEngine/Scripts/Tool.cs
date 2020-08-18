@@ -59,6 +59,7 @@ namespace Arkh.CreatorEngine
             switch (activeTool)
             {
                 case Tools.Add:
+                    if (AddPreview == null) return;
                     AddPreview.SetActive(true);
                     AddPreview.transform.localPosition = pos + new Vector3(0.5f, 0.5f, 0.5f);
                     break;
@@ -105,6 +106,7 @@ namespace Arkh.CreatorEngine
             switch (activeTool)
             {
                 case Tools.Add:
+                    if (AddPreview == null) return;
                     AddPreview.SetActive(false);
                     break;
                 case Tools.Delete:
@@ -161,6 +163,7 @@ namespace Arkh.CreatorEngine
         public void Cleanup()
         {
             GameObject.Destroy(AddPreview);
+            AddPreview = null;
         }
     }
 }
