@@ -32,6 +32,7 @@ namespace Arkh.CreatorEngine
             if (!vParent) vParent = gameObject;
             voxelParent = vParent;
             tool = new Tool(createVoxel);
+            UndoAction.theTool = tool;
             tool.SetParent(gameObject);
         }
 
@@ -141,7 +142,6 @@ namespace Arkh.CreatorEngine
             {
                 tool.StopPreview();
                 tool.Apply();
-                new UndoAction(UndoAction.Type.ADD, Undo);
             }
         }
 
