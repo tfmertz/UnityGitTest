@@ -85,26 +85,48 @@ namespace Arkh.CreatorEngine
             {
                 Vector3 hPoint = voxelParent.transform.InverseTransformPoint(hit.point);
 
-                // Round the positioning down to snap
+                // Snap the ray hit to the grid
                 int x = Mathf.FloorToInt(hPoint.x);
-                int z = Mathf.FloorToInt(hPoint.z);
                 int y = Mathf.FloorToInt(hPoint.y);
+                int z = Mathf.FloorToInt(hPoint.z);
+
+                // For some reason the hit point sometimes is just under the integer increment
+                // so it incorrectly rounds down. So, we check the face normal and
+                // round depending on the face we're touching
+                if (hit.normal.y == 1 || hit.normal.y == -1)
+                {
+                    Debug.Log($"Y face");
+                    y = Mathf.RoundToInt(hPoint.y);
+                    if (hit.normal.y > 0 && y > 0) y--;
+                } else if (hit.normal.x == 1 || hit.normal.x == -1)
+                {
+                    Debug.Log($"X face");
+                    x = Mathf.RoundToInt(hPoint.x);
+                    if (hit.normal.x > 0) x--;
+                } else if (hit.normal.z == 1 || hit.normal.z == -1)
+                {
+                    Debug.Log($"Z face");
+                    z = Mathf.RoundToInt(hPoint.z);
+                    if (hit.normal.z > 0) z--;
+                }
+
+                // Adjust our position based on the tool type and then the local position
+                //CheckNormalsForSides(hit, ref x, ref z, ref y);
+                currentPos = new Vector3(x + voxelParent.transform.position.x, y + voxelParent.transform.position.y, z + voxelParent.transform.position.z);
 
                 //Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
-                if (y >= height)
+                if (CheckValidGridPosition(currentPos))
                 {
-                    // restrict y based off our predetermined height 
-                    y = height - 1;
+                    validHover = true;
+                    tool.StartPreview(currentPos);
+                    Debug.Log($"Valid position: {x}, {y}, {z}");
+                } else
+                {
+                    Debug.Log($"Invalid position: {x}, {y}, {z}");
+                    validHover = false;
+                    // Set the vector to a position that should be impossible to hover
+                    tool.StopPreview();
                 }
-                // In case we accidentally get a tiny number smaller than 0
-                if (y < 0) y = 0;
-
-                CheckNormalsForSides(hit, ref x, ref z, ref y);
-
-                validHover = true;
-
-                currentPos = new Vector3(x + voxelParent.transform.position.x, y + voxelParent.transform.position.y, z + voxelParent.transform.position.z);
-                tool.StartPreview(currentPos);
                 return currentPos;
             }
             else
@@ -120,21 +142,25 @@ namespace Arkh.CreatorEngine
             // Check normals for adding on sides
             if (tool.activeTool == Tool.Tools.Add)
             {
-                if (hit.normal.Equals(Vector3.right) || hit.normal.Equals(-Vector3.right))
+                if (hit.normal.x == 1 || hit.normal.x == -1)
                 {
                     x += (int)hit.normal.x;
                 }
-                else if (hit.normal.Equals(Vector3.forward) || hit.normal.Equals(-Vector3.forward))
+                else if (hit.normal.z == 1 || hit.normal.z == -1)
                 {
                     z += (int)hit.normal.z;
+                }
+                else if (y > 0 && (hit.normal.y == 1 || hit.normal.y == -1))
+                {
+                    y += (int)hit.normal.y;
                 }
             }
             else if (tool.activeTool == Tool.Tools.Delete)
             {
-                if (hit.normal.Equals(Vector3.up) && y > 0)
-                {
-                    y--;
-                }
+                //if (hit.normal.y == 1 || hit.normal.y == -1)
+                //{
+                //    y += (int) hit.normal.y;
+                //}
             }
         }
 
@@ -142,8 +168,7 @@ namespace Arkh.CreatorEngine
         {
             if (validHover)
             {
-                tool.StopPreview();
-                tool.Apply();
+                tool.Apply(currentPos);
             }
         }
 
@@ -151,7 +176,6 @@ namespace Arkh.CreatorEngine
         {
 
             DrawVoxel(GetGridPosition(point));
-
         }
 
         // Clean up the voxelCreator script and hoverPreview
@@ -180,6 +204,21 @@ namespace Arkh.CreatorEngine
         public void SwitchTool(Tool.Tools toolEnum)
         {
             tool.SwitchTool(toolEnum);
+        }
+
+        public bool CheckValidGridPosition(Vector3 point)
+        {
+            float y = point.y;
+            float x = point.x;
+            float z = point.z;
+            if (y < 0 || y >= height || x < 0 || x >= width || z < 0 || z >= width)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }
