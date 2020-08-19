@@ -10,10 +10,10 @@ namespace Arkh.CreatorEngine
 
         CreateVoxel currentVoxelCreator;
         GameObject AddPreview;
-        Vector3 currentPosition;
+        public Vector3 currentPosition;
         Vector3 lastPosition;
 
-        Color color = Color.red;
+        public Color color = Color.red;
 
         public Tool(CreateVoxel createVoxel)
         {
@@ -130,6 +130,7 @@ namespace Arkh.CreatorEngine
                     // TODO take the logic out of the createvoxel and add it to the tool to manage
                     // CreateVoxel should be an API the tools use to manipulate the mesh
                     currentVoxelCreator.Create(currentPosition);
+                    new UndoAction(UndoAction.Type.ADD, currentPosition);
                     break;
                 case Tools.Delete:
                     int voxelIndex = currentVoxelCreator.GetVoxelFromPosition(currentPosition);
@@ -142,6 +143,7 @@ namespace Arkh.CreatorEngine
                     List<Voxel> voxels = new List<Voxel>(currentVoxelCreator.CurrentVoxels);
                     voxels.RemoveAt(voxelIndex);
                     currentVoxelCreator.Load(voxels.ToArray());
+                    new UndoAction(UndoAction.Type.DELETE, currentPosition);
                     break;
                 case Tools.Paint:
                     int index = currentVoxelCreator.GetVoxelFromPosition(currentPosition);
@@ -150,7 +152,7 @@ namespace Arkh.CreatorEngine
                         Debug.Log($"Bailing for {currentPosition}");
                         return;
                     }
-
+                    new UndoAction(UndoAction.Type.PAINT, currentPosition, currentVoxelCreator.CurrentVoxels[index].color);
                     currentVoxelCreator.CurrentVoxels[index].color = color;
                     currentVoxelCreator.Load(currentVoxelCreator.CurrentVoxels.ToArray());
                     break;

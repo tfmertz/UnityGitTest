@@ -13,7 +13,7 @@ namespace Arkh.CreatorEngine
     {
         Creation currentCreation;
         List<Voxel> currentVoxels;
-
+        
         // External references
         public Camera CreatorCamera;
 
@@ -35,7 +35,8 @@ namespace Arkh.CreatorEngine
 
         public void Undo()
         {
-            gridScript.Undo();
+            UndoAction.Undo();
+            //gridScript.Undo();
         }
         public void Load()
         {
@@ -63,7 +64,7 @@ namespace Arkh.CreatorEngine
         {
             Creation creation = currentCreation;
             gridScript.ChangeGridSize(w, h);
-            ResetGrid(w, h);
+            ResetGridTransform(w, h);
         }
 
         public void Save()
@@ -140,28 +141,39 @@ namespace Arkh.CreatorEngine
 
             var w = gridScript.width;
             var h = gridScript.height;
-            ResetGrid(w, h);
-             
+
+
             gridTransform.transform.SetParent(this.transform);
             voxelScript.Grid = gridScript;
 
             touchController = gameObject.AddComponent<TouchController>();
-            touchController.camera = CreatorCamera;
+            touchController.TheCamera = CreatorCamera;
             touchController.theGrid = gridScript;
             touchController.SpinableObject = CreatorCamera.transform.parent.gameObject;
             touchController.SpinableObject.transform.position = gridTransform.transform.position;
 
-            touchController.camera.transform.localPosition = new Vector3(0, 0, -79);
-            touchController.SpinableObject.transform.rotation = Quaternion.Euler(30, 45, 0);
-            ResetGrid(w, h);
+            UndoAction.CurrentCameraPosition = touchController.TheCamera.transform.localPosition = touchController.StartZoomPosition;
+            UndoAction.CurrentGimbalRotation = touchController.SpinableObject.transform.rotation = touchController.StartSpinPosition;
+            Debug.Log("cam start:" + UndoAction.CurrentCameraPosition);
+            ResetGridTransform(w, h);
         }
 
-        private void ResetGrid(int w, int h)
+        private void ResetGridTransform(int w, int h)
         {
             gridScript.transform.localPosition = new Vector3(w / 2 * -1, 0, h / 2 * -1);
             gridScript.transform.parent.transform.position = new Vector3(w / 2, 0, h / 2);
             if (touchController)
                 touchController.SpinableObject.transform.localPosition = gridScript.transform.parent.transform.position;
+
+            // TODO: Clean up Voxels that exist outside.
+        }
+        public void ResetGridToCenter()
+        {
+            if (touchController)
+            {
+                touchController.TheCamera.transform.localPosition = new Vector3(0, 0, -79);
+                touchController.SpinableObject.transform.rotation = Quaternion.Euler(30, 45, 0);
+            }
         }
     }
 }

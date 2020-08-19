@@ -32,6 +32,7 @@ namespace Arkh.CreatorEngine
             if (!vParent) vParent = gameObject;
             voxelParent = vParent;
             tool = new Tool(createVoxel);
+            UndoAction.theTool = tool;
             tool.SetParent(gameObject);
         }
 
