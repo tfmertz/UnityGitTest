@@ -10,10 +10,9 @@ namespace Arkh.CreatorEngine
 
         CreateVoxel currentVoxelCreator;
         GameObject AddPreview;
-        public Vector3 currentPosition;
-        Vector3 lastPosition;
-
-        public Color color = Color.red;
+        // Start currentPosition off at the vector that should be impossible to hover to
+        Vector3 currentPosition = new Vector3(-1, -1, -1);
+        Color color = Color.red;
 
         public Tool(CreateVoxel createVoxel)
         {
@@ -160,6 +159,9 @@ namespace Arkh.CreatorEngine
                     Debug.Log("No tools matches to apply");
                     break;
             }
+
+            // Reset the current position once applied
+            currentPosition = new Vector3(-1, -1, -1);
         }
 
         public void Cleanup()
