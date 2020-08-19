@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 478541318149721026}
   - component: {fileID: 6407942508381346388}
+  - component: {fileID: 5899059271271326312}
   m_Layer: 0
   m_Name: CreationEditor
   m_TagString: Untagged
@@ -45,6 +46,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CreatorCamera: {fileID: 744875910312439686}
+--- !u!114 &5899059271271326312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 478541318149721024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c43d97d2fc7d1044fb08db3c55a90a18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7282930721476748286
 GameObject:
   m_ObjectHideFlags: 0

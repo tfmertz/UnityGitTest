@@ -8,6 +8,7 @@ namespace Arkh.CreatorEngine
     /// The CreateVoxel class is the API for adding voxels at a position into a mesh
     /// and correctly generating everything needed to view them. 
     /// </summary>
+    [System.Serializable]
     public class CreateVoxel : MonoBehaviour
     {
         public Material mat;
