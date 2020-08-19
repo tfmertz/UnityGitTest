@@ -12,6 +12,8 @@ namespace Arkh.CreatorEngine
 
         public Material mat;
         public CreateVoxel createVoxel;
+        //
+        //
         public Camera creatorCamera;
         public GameObject voxelParent;
 
