@@ -7,12 +7,12 @@ namespace Arkh.CreatorEngine
     {
         public enum Tools { Add, Delete, Paint }
         public Tools activeTool;
+        // Start currentPosition off at the vector that should be impossible to hover to
+        public Vector3 currentPosition = new Vector3(-1, -1, -1);
+        public Color color = Color.red;
 
         CreateVoxel currentVoxelCreator;
         GameObject AddPreview;
-        // Start currentPosition off at the vector that should be impossible to hover to
-        Vector3 currentPosition = new Vector3(-1, -1, -1);
-        Color color = Color.red;
 
         public Tool(CreateVoxel createVoxel)
         {
@@ -118,40 +118,45 @@ namespace Arkh.CreatorEngine
                     Debug.Log("Default preview");
                     break;
             }
+            // Reset the position
+            currentPosition = new Vector3(-1, -1, -1);
         }
 
         // Handles updating the voxel creation when a tool is used
-        public void Apply()
+        public void Apply(Vector3 position)
         {
+            // End the current preview
+            StopPreview();
+
             switch (activeTool)
             {
                 case Tools.Add:
                     // TODO take the logic out of the createvoxel and add it to the tool to manage
                     // CreateVoxel should be an API the tools use to manipulate the mesh
-                    currentVoxelCreator.Create(currentPosition);
-                    new UndoAction(UndoAction.Type.ADD, currentPosition);
+                    currentVoxelCreator.Create(position);
+                    new UndoAction(UndoAction.Type.ADD, position);
                     break;
                 case Tools.Delete:
-                    int voxelIndex = currentVoxelCreator.GetVoxelFromPosition(currentPosition);
+                    int voxelIndex = currentVoxelCreator.GetVoxelFromPosition(position);
                     if (voxelIndex == -1)
                     {
-                        Debug.Log($"Bailing for {currentPosition}");
+                        Debug.Log($"Bailing for {position}");
                         return;
                     }
 
                     List<Voxel> voxels = new List<Voxel>(currentVoxelCreator.CurrentVoxels);
                     voxels.RemoveAt(voxelIndex);
                     currentVoxelCreator.Load(voxels.ToArray());
-                    new UndoAction(UndoAction.Type.DELETE, currentPosition);
+                    new UndoAction(UndoAction.Type.DELETE, position);
                     break;
                 case Tools.Paint:
-                    int index = currentVoxelCreator.GetVoxelFromPosition(currentPosition);
+                    int index = currentVoxelCreator.GetVoxelFromPosition(position);
                     if (index == -1)
                     {
-                        Debug.Log($"Bailing for {currentPosition}");
+                        Debug.Log($"Bailing for {position}");
                         return;
                     }
-                    new UndoAction(UndoAction.Type.PAINT, currentPosition, currentVoxelCreator.CurrentVoxels[index].color);
+                    new UndoAction(UndoAction.Type.PAINT, position, currentVoxelCreator.CurrentVoxels[index].color);
                     currentVoxelCreator.CurrentVoxels[index].color = color;
                     currentVoxelCreator.Load(currentVoxelCreator.CurrentVoxels.ToArray());
                     break;
@@ -162,6 +167,27 @@ namespace Arkh.CreatorEngine
 
             // Reset the current position once applied
             currentPosition = new Vector3(-1, -1, -1);
+        }
+
+        public void Undo(UndoAction undoAction)
+        {
+            Tools prevTool = activeTool;
+            Color prevColor = color;
+            if (undoAction.Action == UndoAction.Type.ADD)
+            {
+                activeTool = Tools.Delete;
+            } else if (undoAction.Action == UndoAction.Type.DELETE)
+            {
+                activeTool = Tools.Add;
+            } else
+            {
+                color = undoAction.ColorUndoValue;
+                activeTool = Tools.Paint;
+            }
+
+            Apply(undoAction.TouchedUndoPosition);
+            activeTool = prevTool;
+            color = prevColor;
         }
 
         public void Cleanup()

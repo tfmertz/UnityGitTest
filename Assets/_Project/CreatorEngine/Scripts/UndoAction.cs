@@ -11,6 +11,7 @@ namespace Arkh.CreatorEngine
         public static Tool theTool;
         //
         private Type action;
+        public Type Action { get { return action; } }
         public Camera Camera;
         public static bool ignoreDuringUndo = false;
         public Color ColorUndoValue;
@@ -114,45 +115,19 @@ namespace Arkh.CreatorEngine
                     //MethodCall();
                     //
                     // assign temp tool values
-                    theTool.currentPosition = TouchedUndoPosition;
-                    theTool.activeTool = Tool.Tools.Delete;
-                    //
-                    // Apply the changes
-                    theTool.Apply();
-                    //
-                    // reset the tool
-                    theTool.currentPosition = tempPosition;
-                    theTool.activeTool = tempTool;
+                    theTool.Undo(this);
                     break;
                 case Type.DELETE:
                     //MethodCall();
                     //
                     // assign temp tool values
-                    theTool.currentPosition = TouchedUndoPosition;
-                    theTool.activeTool = Tool.Tools.Add;
-                    //
-                    // Apply the changes
-                    theTool.Apply();
-                    //
-                    // reset the tool
-                    theTool.currentPosition = tempPosition;
-                    theTool.activeTool = tempTool;
+                    theTool.Undo(this);
                     break;
                 case Type.PAINT:
                     //MethodCall();
                     //
                     // assign temp tool values
-                    theTool.currentPosition = TouchedUndoPosition;
-                    theTool.activeTool = Tool.Tools.Paint;
-                    theTool.color = ColorUndoValue;
-                    //
-                    // Apply the changes
-                    theTool.Apply();
-                    //
-                    // reset the tool
-                    theTool.currentPosition = tempPosition;
-                    theTool.activeTool = tempTool;
-                    theTool.color = tempColor;
+                    theTool.Undo(this);
                     break;
                 case Type.ROTATE:
                     CurrentGimbalRotation = Gimbal.transform.rotation = GimbalUndoTransform;

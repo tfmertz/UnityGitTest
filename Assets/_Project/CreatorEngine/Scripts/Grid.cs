@@ -109,7 +109,7 @@ namespace Arkh.CreatorEngine
                 }
 
                 // Adjust our position based on the tool type and then the local position
-                CheckNormalsForSides(hit, ref x, ref z, ref y);
+                //CheckNormalsForSides(hit, ref x, ref z, ref y);
                 currentPos = new Vector3(x + voxelParent.transform.position.x, y + voxelParent.transform.position.y, z + voxelParent.transform.position.z);
 
                 //Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
@@ -123,16 +123,13 @@ namespace Arkh.CreatorEngine
                     Debug.Log($"Invalid position: {x}, {y}, {z}");
                     validHover = false;
                     // Set the vector to a position that should be impossible to hover
-                    currentPos = new Vector3(-1, -1, -1);
                     tool.StopPreview();
                 }
-
                 return currentPos;
             }
             else
             {
                 validHover = false;
-                currentPos = new Vector3(-1, -1, -1);
                 tool.StopPreview();
             }
             return Vector3.zero;
@@ -169,8 +166,7 @@ namespace Arkh.CreatorEngine
         {
             if (validHover)
             {
-                tool.StopPreview();
-                tool.Apply();
+                tool.Apply(currentPos);
             }
         }
 
