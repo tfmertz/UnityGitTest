@@ -51,6 +51,8 @@ namespace Arkh.CreatorEngine
                 currentCreation = JsonUtility.FromJson<Creation>(fileData);
                 SetupGrid();
                 gridScript.Load(currentCreation);
+                // Reset the undo history
+                UndoAction.ClearHistory();
                 return true;
             }
             else
@@ -136,8 +138,12 @@ namespace Arkh.CreatorEngine
             
             gridScript.creatorCamera = CreatorCamera;
 
-
-            touchController = gameObject.AddComponent<TouchController>();
+            // Either find, or add our touch controller
+            touchController = gameObject.GetComponent<TouchController>();
+            if (touchController == null)
+            {
+                touchController = gameObject.AddComponent<TouchController>();
+            }
             touchController.TheCamera = CreatorCamera;
             touchController.theGrid = gridScript;
             touchController.SpinableObject = CreatorCamera.transform.parent.gameObject;

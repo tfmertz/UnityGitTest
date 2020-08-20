@@ -59,7 +59,7 @@ namespace Arkh.CreatorEngine
             }
             planes = new List<GameObject>(); // for 6 sides of a cube
 
-            // Create ground
+            // Set up new grid values
             float quadWidth = width * size;
             float heightCenter = height * size / 2;
             float widthCenter = width * size / 2;
@@ -68,6 +68,7 @@ namespace Arkh.CreatorEngine
             gridMat.mainTextureScale = new Vector2(width, width);
             gridSidesMat.mainTextureScale = new Vector2(width, height);
 
+            // Create ground
             Vector3 pos = transform.position + new Vector3(widthCenter, 0, widthCenter);
             Vector3 scale = new Vector3(quadWidth, quadWidth, 0);
             Vector3 rot = new Vector3(90.0f, 0, 0);
@@ -89,19 +90,19 @@ namespace Arkh.CreatorEngine
             pos = transform.position + new Vector3(widthCenter, heightCenter, 0);
             scale = new Vector3(quadWidth, height, 0);
             rot = new Vector3(0, 180.0f, 0);
-            CreatePlane("back", pos, scale, rot, gridSidesMat);
+            CreatePlane("front", pos, scale, rot, gridSidesMat);
 
             // Right plane
             pos = transform.position + new Vector3(width, heightCenter, widthCenter);
             scale = new Vector3(quadWidth, height, 0);
             rot = new Vector3(0, 90.0f, 0);
-            CreatePlane("back", pos, scale, rot, gridSidesMat);
+            CreatePlane("right", pos, scale, rot, gridSidesMat);
 
             // Left plane
             pos = transform.position + new Vector3(0, heightCenter, widthCenter);
             scale = new Vector3(quadWidth, height, 0);
             rot = new Vector3(0, -90.0f, 0);
-            CreatePlane("back", pos, scale, rot, gridSidesMat);
+            CreatePlane("left", pos, scale, rot, gridSidesMat);
 
             // Reset the grid's position to be the center
             transform.position = new Vector3(-widthCenter, 0, -widthCenter);
