@@ -106,7 +106,7 @@ namespace Arkh.CreatorEngine
 
             // set up temp tool holders
             Tool.Tools tempTool = theTool.activeTool;
-            Vector3 tempPosition = theTool.currentPosition;
+            Vector3 tempPosition = theTool.previewPosition;
             Color tempColor = theTool.color;
             ignoreDuringUndo = true;
             switch (action)

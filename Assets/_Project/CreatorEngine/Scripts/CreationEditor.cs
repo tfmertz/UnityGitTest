@@ -64,7 +64,7 @@ namespace Arkh.CreatorEngine
         {
             Creation creation = currentCreation;
             gridScript.ChangeGridSize(w, h);
-            ResetGridTransform(w, h);
+            //ResetGridTransform(w, h);
         }
 
         public void Save()
@@ -96,6 +96,7 @@ namespace Arkh.CreatorEngine
             {
                 Destroy(grid);
                 gridScript = null;
+                touchController.theGrid = null;
             }
         }
 
@@ -118,8 +119,6 @@ namespace Arkh.CreatorEngine
             Exit();
 
             // Get needed materials
-            Material gridMat = Resources.Load<Material>("Grid");
-            Material test = Resources.Load<Material>("Test");
             Material voxel = Resources.Load<Material>("Voxel");
 
             // Create grid and voxel creator
@@ -128,34 +127,26 @@ namespace Arkh.CreatorEngine
             voxelScript.mat = voxel;
 
             grid = new GameObject("Grid");
+            grid.transform.SetParent(transform);
             gridScript = grid.AddComponent<Grid>();
-            gridScript.mat = gridMat;
             gridScript.CreateVoxel = voxelScript;
 
-            GameObject gridTransform = new GameObject("GridTransform");
-            gridScript.Init(gridTransform);
-            grid.transform.SetParent(gridTransform.transform);
             voxelCreator.transform.SetParent(grid.transform);
-            gridScript.creatorCamera = CreatorCamera;
-            //gridScript.voxelParent = gridTransform;
-
-            var w = gridScript.width;
-            var h = gridScript.height;
-
-
-            gridTransform.transform.SetParent(this.transform);
             voxelScript.Grid = gridScript;
+            
+            gridScript.creatorCamera = CreatorCamera;
+
 
             touchController = gameObject.AddComponent<TouchController>();
             touchController.TheCamera = CreatorCamera;
             touchController.theGrid = gridScript;
             touchController.SpinableObject = CreatorCamera.transform.parent.gameObject;
-            touchController.SpinableObject.transform.position = gridTransform.transform.position;
+            //touchController.SpinableObject.transform.position = gridTransform.transform.position;
 
             UndoAction.CurrentCameraPosition = touchController.TheCamera.transform.localPosition = touchController.StartZoomPosition;
             UndoAction.CurrentGimbalRotation = touchController.SpinableObject.transform.rotation = touchController.StartSpinPosition;
             Debug.Log("cam start:" + UndoAction.CurrentCameraPosition);
-            ResetGridTransform(w, h);
+            //ResetGridTransform(w, h);
         }
 
         private void ResetGridTransform(int w, int h)
