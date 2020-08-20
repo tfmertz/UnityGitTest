@@ -47,6 +47,8 @@ namespace Arkh.CreatorEngine
 
         private void Update()
         {
+            if (theGrid == null) return;
+
             Vector2 currentPosition = lastPosition;
             Vector2 deltaPositon = Vector2.zero;
 

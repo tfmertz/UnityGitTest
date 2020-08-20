@@ -10,14 +10,15 @@ namespace Arkh.CreatorEngine
         public int height = 3;
         public float size = 1; // in unity meters
 
-        public Material mat;
+        public Material gridMat;
+        public Material gridSidesMat;
         public CreateVoxel createVoxel;
         //
         //
         public Camera creatorCamera;
         public GameObject voxelParent;
 
-        GameObject ground;
+        List<GameObject> planes;
         Vector3 currentPos;
         public bool validHover;
         Tool tool;
@@ -28,14 +29,14 @@ namespace Arkh.CreatorEngine
         public CreateVoxel CreateVoxel { set { createVoxel = value; } }
 
         // Start is called before the first frame update
-        public void Init(GameObject vParent = null)
+        public void Start()
         {
-            CreateGroundPlane();
-            if (!vParent) vParent = gameObject;
-            voxelParent = vParent;
+            gridMat = Resources.Load<Material>("Grid");
+            gridSidesMat = Resources.Load<Material>("GridSides");
+            planes = new List<GameObject>();
+            CreateGrid();
             tool = new Tool(createVoxel);
             UndoAction.theTool = tool;
-            tool.SetParent(gameObject);
         }
 
         // Update is called once per frame
@@ -45,31 +46,86 @@ namespace Arkh.CreatorEngine
         }
         public void ChangeGridSize(int w = 16, int h = 16)
         {
-            CreateGroundPlane(w, h);
+            width = w;
+            height = h;
+            CreateGrid();
             createVoxel.Load(createVoxel.CurrentVoxels.ToArray());
         }
 
-        void CreateGroundPlane(int w = 16, int h = 16)
+        void CreateGrid()
         {
-            if (ground) { Destroy(ground);}
+            // Destroy our existing planes if any
+            foreach(GameObject plane in planes)
+            {
+                Destroy(plane);
+            }
+            planes = new List<GameObject>(); // for 6 sides of a cube
+
+            // Create ground
+            float quadWidth = width * size;
+            float heightCenter = height * size / 2;
+            float widthCenter = width * size / 2;
+
+            // Set up the material tiling
+            gridMat.mainTextureScale = new Vector2(width, width);
+            gridSidesMat.mainTextureScale = new Vector2(width, height);
+
+            Vector3 pos = transform.position + new Vector3(widthCenter, 0, widthCenter);
+            Vector3 scale = new Vector3(quadWidth, quadWidth, 0);
+            Vector3 rot = new Vector3(90.0f, 0, 0);
+            CreatePlane("ground", pos, scale, rot, gridMat);
+
+            // Top plane
+            pos = transform.position + new Vector3(widthCenter, height, widthCenter);
+            scale = new Vector3(quadWidth, quadWidth, 0);
+            rot = new Vector3(-90.0f, 0, 0);
+            CreatePlane("top", pos, scale, rot, gridMat);
+
+            // Back plane
+            pos = transform.position + new Vector3(widthCenter, heightCenter, width);
+            scale = new Vector3(quadWidth, height, 0);
+            rot = Vector3.zero;
+            CreatePlane("back", pos, scale, rot, gridSidesMat);
+
+            // Front plane
+            pos = transform.position + new Vector3(widthCenter, heightCenter, 0);
+            scale = new Vector3(quadWidth, height, 0);
+            rot = new Vector3(0, 180.0f, 0);
+            CreatePlane("back", pos, scale, rot, gridSidesMat);
+
+            // Right plane
+            pos = transform.position + new Vector3(width, heightCenter, widthCenter);
+            scale = new Vector3(quadWidth, height, 0);
+            rot = new Vector3(0, 90.0f, 0);
+            CreatePlane("back", pos, scale, rot, gridSidesMat);
+
+            // Left plane
+            pos = transform.position + new Vector3(0, heightCenter, widthCenter);
+            scale = new Vector3(quadWidth, height, 0);
+            rot = new Vector3(0, -90.0f, 0);
+            CreatePlane("back", pos, scale, rot, gridSidesMat);
+
+            // Reset the grid's position to be the center
+            transform.position = new Vector3(-widthCenter, 0, -widthCenter);
+        }
+
+        void CreatePlane(string name, Vector3 pos, Vector3 scale, Vector3 rot, Material mat)
+        {
             // Create the component in the heirarchy
-            ground = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            ground.transform.SetParent(transform);
+            GameObject plane = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            plane.name = name;
+            plane.transform.SetParent(transform);
 
             // Remove the cooking options
-            ground.GetComponent<MeshCollider>().cookingOptions -= MeshColliderCookingOptions.CookForFasterSimulation;
-            //Destroy(ground.GetComponent <MeshCollider>());
-            //ground.AddComponent<BoxCollider>();
-            width = w;
-            height = h;
-            float quadWidth = width * size;
-            float center = (width * size / 2);
-            ground.transform.position = transform.position + new Vector3(center, 0, center);
-            ground.transform.localScale = new Vector3(quadWidth, quadWidth, 0);
-            ground.transform.Rotate(new Vector3(90, 0, 0));
-            MeshRenderer meshRenderer = ground.GetComponent<MeshRenderer>();
-            mat.mainTextureScale = new Vector2(width, width);
+            plane.GetComponent<MeshCollider>().cookingOptions -= MeshColliderCookingOptions.CookForFasterSimulation;
+            
+            plane.transform.position = pos;
+            plane.transform.localScale = scale;
+            plane.transform.Rotate(rot);
+            MeshRenderer meshRenderer = plane.GetComponent<MeshRenderer>();
             meshRenderer.material = mat;
+
+            planes.Add(plane);
         }
 
         void HandleHover()
@@ -83,7 +139,8 @@ namespace Arkh.CreatorEngine
             RaycastHit hit;
             if (Physics.Raycast(creatorCamera.ScreenPointToRay(Input.mousePosition), out hit, 300.0f))
             {
-                Vector3 hPoint = voxelParent.transform.InverseTransformPoint(hit.point);
+                // translate our hit into localposition
+                Vector3 hPoint = transform.InverseTransformPoint(hit.point);
 
                 // Snap the ray hit to the grid
                 int x = Mathf.FloorToInt(hPoint.x);
@@ -98,21 +155,24 @@ namespace Arkh.CreatorEngine
                     Debug.Log($"Y face");
                     y = Mathf.RoundToInt(hPoint.y);
                     if (hit.normal.y > 0 && y > 0) y--;
+                    if (hit.normal.y < 0 && y == height) y--;
                 } else if (hit.normal.x == 1 || hit.normal.x == -1)
                 {
                     Debug.Log($"X face");
                     x = Mathf.RoundToInt(hPoint.x);
-                    if (hit.normal.x > 0) x--;
+                    if (hit.normal.x > 0 && x > 0) x--;
+                    if (hit.normal.x < 0 && x == width) x--;
                 } else if (hit.normal.z == 1 || hit.normal.z == -1)
                 {
                     Debug.Log($"Z face");
                     z = Mathf.RoundToInt(hPoint.z);
-                    if (hit.normal.z > 0) z--;
+                    if (hit.normal.z > 0 && z > 0) z--;
+                    if (hit.normal.z < 0 && z == width) z--;
                 }
 
-                // Adjust our position based on the tool type and then the local position
+                // Adjust our position based on the tool type and then the local position of grid
                 //CheckNormalsForSides(hit, ref x, ref z, ref y);
-                currentPos = new Vector3(x + voxelParent.transform.position.x, y + voxelParent.transform.position.y, z + voxelParent.transform.position.z);
+                currentPos = new Vector3(x, y, z);
 
                 //Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
                 if (CheckValidGridPosition(currentPos))
@@ -122,7 +182,7 @@ namespace Arkh.CreatorEngine
                     Debug.Log($"Valid position: {x}, {y}, {z}");
                 } else
                 {
-                    Debug.Log($"Invalid position: {x}, {y}, {z}");
+                    Debug.Log($"Invalid position: {x}, {y}, {z}, {currentPos}");
                     validHover = false;
                     // Set the vector to a position that should be impossible to hover
                     tool.StopPreview();
@@ -211,7 +271,7 @@ namespace Arkh.CreatorEngine
             float y = point.y;
             float x = point.x;
             float z = point.z;
-            if (y < 0 || y >= height || x < 0 || x >= width || z < 0 || z >= width)
+            if (y < 0 || y > height || x < 0 || x > width || z < 0 || z > width)
             {
                 return false;
             }

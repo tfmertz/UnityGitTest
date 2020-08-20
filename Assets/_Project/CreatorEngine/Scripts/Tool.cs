@@ -8,7 +8,7 @@ namespace Arkh.CreatorEngine
         public enum Tools { Add, Delete, Paint }
         public Tools activeTool;
         // Start currentPosition off at the vector that should be impossible to hover to
-        public Vector3 currentPosition = new Vector3(-1, -1, -1);
+        public Vector3 previewPosition = new Vector3(-1, -1, -1);
         public Color color = Color.red;
 
         CreateVoxel currentVoxelCreator;
@@ -18,6 +18,7 @@ namespace Arkh.CreatorEngine
         {
             currentVoxelCreator = createVoxel;
             activeTool = Tools.Add;
+
             // Create add previewer
             Material preview = Resources.Load<Material>("Preview");
 
@@ -26,6 +27,7 @@ namespace Arkh.CreatorEngine
             AddPreview.GetComponent<MeshRenderer>().material = preview;
             GameObject.Destroy(AddPreview.GetComponent<BoxCollider>());
             AddPreview.SetActive(false);
+            AddPreview.transform.SetParent(createVoxel.Grid.gameObject.transform);
         }
 
         public void SwitchTool(Tools tool)
@@ -33,15 +35,10 @@ namespace Arkh.CreatorEngine
             activeTool = tool;
         }
 
-        public void SetParent(GameObject vParent)
-        {
-            AddPreview.transform.SetParent(vParent.transform);
-        }
-
         // Handles the voxel creator preview for the active tool
         public void StartPreview(Vector3 pos)
         {
-            if (currentPosition.Equals(pos))
+            if (previewPosition.Equals(pos))
             {
                 // bail out if the position didn't change
                 return;
@@ -53,7 +50,7 @@ namespace Arkh.CreatorEngine
                     StopPreview();
                 }
             }
-            currentPosition = pos;
+            previewPosition = pos;
 
             switch (activeTool)
             {
@@ -119,7 +116,7 @@ namespace Arkh.CreatorEngine
                     break;
             }
             // Reset the position
-            currentPosition = new Vector3(-1, -1, -1);
+            previewPosition = new Vector3(-1, -1, -1);
         }
 
         // Handles updating the voxel creation when a tool is used
@@ -166,7 +163,7 @@ namespace Arkh.CreatorEngine
             }
 
             // Reset the current position once applied
-            currentPosition = new Vector3(-1, -1, -1);
+            previewPosition = new Vector3(-1, -1, -1);
         }
 
         public void Undo(UndoAction undoAction)

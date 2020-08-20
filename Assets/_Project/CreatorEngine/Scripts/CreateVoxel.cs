@@ -16,9 +16,8 @@ namespace Arkh.CreatorEngine
         MeshRenderer meshRenderer;
         MeshFilter meshFilter;
         MeshCollider meshCollider;
-        Grid grid;
 
-        public Grid Grid { set { grid = value; } }
+        public Grid Grid { get; set; }
 
         Mesh currentMesh;
         int[,,] currentVoxelMap;
@@ -50,13 +49,13 @@ namespace Arkh.CreatorEngine
         // Resets information about where voxels are in our grid
         void CreateVoxelMap()
         {
-            voxelMap = new int[grid.width, grid.height, grid.width];
+            voxelMap = new int[Grid.width, Grid.height, Grid.width];
             // Fill it with -1
-            for (int i = 0; i < grid.width; i++)
+            for (int i = 0; i < Grid.width; i++)
             {
-                for (int j = 0; j < grid.height; j++)
+                for (int j = 0; j < Grid.height; j++)
                 {
-                    for (int k = 0; k < grid.width; k++)
+                    for (int k = 0; k < Grid.width; k++)
                     {
                         voxelMap[i, j, k] = -1;
                     }
@@ -72,7 +71,7 @@ namespace Arkh.CreatorEngine
             int z = Mathf.FloorToInt(pos.z);
 
             // First, make sure we aren't out of bounds
-            if (x < 0 || x > grid.width - 1 || y < 0 || y > grid.height - 1 || z < 0 || z > grid.width - 1)
+            if (x < 0 || x > Grid.width - 1 || y < 0 || y > Grid.height - 1 || z < 0 || z > Grid.width - 1)
             {
                 return false;
             }
