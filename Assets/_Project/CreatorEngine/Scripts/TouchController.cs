@@ -13,7 +13,7 @@ namespace Arkh.CreatorEngine
         public float CameraZoomSpeedOrtho = .2f;
         public float CameraZoomSpeedPersp = .2f;
         public float CameraZoomSpeedWheel = .8f;
-        public float rotSpeed = 30f;
+        public float rotSpeed = 50.0f;
         private bool isDragging;
         public Grid theGrid;
         public Camera TheCamera;
@@ -71,7 +71,10 @@ namespace Arkh.CreatorEngine
                     {
                         currentPosition = lastPosition = Input.mousePosition;
                         mouseDown = true;
-                        isDragging = true;
+                        if (!theGrid.validHover)
+                        {
+                            isDragging = true;
+                        }
                         theGrid.DrawVoxelOnMouseDown(Input.mousePosition);
                     }
                 }
@@ -89,7 +92,8 @@ namespace Arkh.CreatorEngine
                     deltaPositon = currentPosition - lastPosition;
                     lastPosition = Input.mousePosition;
 
-                    if (!theGrid.validHover) RotateObject(); 
+                    //if (!theGrid.validHover) RotateObject();
+                    RotateObject();
                     
                     /*else if (deltaPositon.magnitude > 7 || deltaPositon.magnitude < -7)
                     {

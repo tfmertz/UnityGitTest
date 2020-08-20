@@ -6,8 +6,7 @@ namespace Arkh.CreatorEngine
 {
     public class UndoAction
     {
-        public static List<UndoAction> UndoList;
-        public static bool isBuilt = false;
+        public static List<UndoAction> UndoList = new List<UndoAction>();
         public static Tool theTool;
         //
         private Type action;
@@ -144,12 +143,6 @@ namespace Arkh.CreatorEngine
         }
         public void AddToList()
         {
-
-            if (!isBuilt)
-            {
-                UndoAction.UndoList = new List<UndoAction>(); 
-                isBuilt = true;
-            }
             UndoAction.UndoList.Add(this);
         }
         public static void Undo()
@@ -158,6 +151,11 @@ namespace Arkh.CreatorEngine
             {
                 UndoAction.UndoList[UndoList.Count - 1].DoUndo();
             }
+        }
+
+        public static void ClearHistory()
+        {
+            UndoList.Clear();
         }
     }
 }

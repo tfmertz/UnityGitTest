@@ -20,14 +20,15 @@ namespace Arkh.CreatorEngine
         public Grid Grid { get; set; }
 
         Mesh currentMesh;
-        int[,,] currentVoxelMap;
         bool isPreview;
 
         // Stores information about where our voxels are in the current grid
         // Each CreateVoxel (or Layer) will have one to store info to quickly
         // look up whether a space is occupied. The int corresponds to the Voxel's
         // index inside the currentVoxel List for easy reverse lookup.
-        int[,,] voxelMap;
+        //int[,,] voxelMap;
+        Hashtable voxelMapString = new Hashtable();
+        Hashtable currentVoxelMap;
 
 
         List<Voxel> currentVoxels = new List<Voxel>();
@@ -49,18 +50,7 @@ namespace Arkh.CreatorEngine
         // Resets information about where voxels are in our grid
         void CreateVoxelMap()
         {
-            voxelMap = new int[Grid.width, Grid.height, Grid.width];
-            // Fill it with -1
-            for (int i = 0; i < Grid.width; i++)
-            {
-                for (int j = 0; j < Grid.height; j++)
-                {
-                    for (int k = 0; k < Grid.width; k++)
-                    {
-                        voxelMap[i, j, k] = -1;
-                    }
-                }
-            }
+            voxelMapString = new Hashtable();
         }
 
         // Checks if the position is taken
@@ -70,14 +60,12 @@ namespace Arkh.CreatorEngine
             int y = Mathf.FloorToInt(pos.y);
             int z = Mathf.FloorToInt(pos.z);
 
-            // First, make sure we aren't out of bounds
-            if (x < 0 || x > Grid.width - 1 || y < 0 || y > Grid.height - 1 || z < 0 || z > Grid.width - 1)
+            if (voxelMapString.ContainsKey($"{x},{y},{z}"))
             {
-                return false;
+                return true;
             }
 
-            // if we have a valid voxel index inside currentVoxels, then a voxel exists at this position
-            return voxelMap[x, y, z] > -1;
+            return false;
         }
 
         public void Create(Vector3 position)
@@ -95,7 +83,7 @@ namespace Arkh.CreatorEngine
             {
                 position = position,
             });
-            voxelMap[(int)position.x, (int)position.y, (int)position.z] = currentVoxels.Count - 1;
+            AddVoxelToMap(position, currentVoxels.Count - 1);
 
             CreateVoxelMesh(currentVoxels.ToArray());
         }
@@ -137,7 +125,7 @@ namespace Arkh.CreatorEngine
                     position = position,
                     color = voxels[i].color,
                 });
-                voxelMap[(int)position.x, (int)position.y, (int)position.z] = i;
+                AddVoxelToMap(position, i);
             }
 
             // Once our currentVoxels and voxelMap is populated, we can create the mesh
@@ -156,7 +144,7 @@ namespace Arkh.CreatorEngine
             for (int i = 0; i < voxels.Length; i++)
             {
                 Vector3 position = voxels[i].position;
-                voxelMap[(int)position.x, (int)position.y, (int)position.z] = i;
+                AddVoxelToMap(position, i);
             }
             CreateVoxelMesh(voxels);
         }
@@ -164,13 +152,26 @@ namespace Arkh.CreatorEngine
         public void StopPreview()
         {
             meshFilter.mesh = currentMesh;
-            voxelMap = currentVoxelMap;
+            voxelMapString = currentVoxelMap;
             isPreview = false;
+        }
+
+        public void AddVoxelToMap(Vector3 pos, int index)
+        {
+            string key = $"{(int)pos.x},{(int)pos.y},{(int)pos.z}";
+            voxelMapString.Add(key, index);
         }
 
         public int GetVoxelFromPosition(Vector3 pos)
         {
-            return voxelMap[(int)pos.x, (int)pos.y, (int)pos.z];
+            string key = $"{(int)pos.x},{(int)pos.y},{(int)pos.z}";
+            //return voxelMap[(int)pos.x, (int)pos.y, (int)pos.z];
+            if (voxelMapString.ContainsKey(key))
+            {
+                return (int) voxelMapString[key];
+            }
+
+            return -1;
         }
 
         /// <summary>
@@ -241,7 +242,7 @@ namespace Arkh.CreatorEngine
             if (!isPreview)
             {
                 currentMesh = mesh;
-                currentVoxelMap = (int[,,])voxelMap.Clone();
+                currentVoxelMap = (Hashtable) voxelMapString.Clone();
                 meshCollider.sharedMesh = mesh;
             }
         }
