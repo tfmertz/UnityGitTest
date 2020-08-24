@@ -20,6 +20,10 @@ namespace Arkh.CreatorEngine
         Vector3 currentPos;
         public bool validHover;
         Tool tool;
+        public Tool Tool
+        {
+            get { return tool; }
+        }
 
         private Touch theTouch;
         private bool isDragging;

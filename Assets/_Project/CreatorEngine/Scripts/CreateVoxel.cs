@@ -70,7 +70,7 @@ namespace Arkh.CreatorEngine
             return false;
         }
 
-        public void Create(Vector3 position)
+        public void Create(Vector3 position, Color color)
         {
             // First, check if we have a voxel at this position
             if (CheckVoxelMap(position))
@@ -85,8 +85,9 @@ namespace Arkh.CreatorEngine
             {
                 position = position,
             });
-            AddVoxelToMap(position, currentVoxels.Count - 1);
-
+            int index = currentVoxels.Count - 1;
+            AddVoxelToMap(position, index);
+            currentVoxels[index].color = color;
             CreateVoxelMesh(currentVoxels.ToArray());
         }
 

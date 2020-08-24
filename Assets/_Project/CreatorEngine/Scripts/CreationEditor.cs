@@ -11,6 +11,8 @@ namespace Arkh.CreatorEngine
     /// </summary>
     public class CreationEditor : MonoBehaviour
     {
+       public ColorSelector ColorSelector;
+
         Creation currentCreation;
         List<Voxel> currentVoxels;
 
@@ -26,6 +28,11 @@ namespace Arkh.CreatorEngine
         int ToggleViewType = 0;
 
         TouchController touchController;
+
+        public void Start()
+        {
+            ColorSelector.SetColor += SetColor;
+        }
         public void CreateNew(string name)
         {
             currentCreation = new Creation
@@ -64,6 +71,11 @@ namespace Arkh.CreatorEngine
                 Debug.Log("No file");
                 return false;
             }
+        }
+
+        public void SetColor(Color color)
+        {
+            gridScript.Tool.color = color;
         }
 
         public void ChangeGridSize(int w, int h)

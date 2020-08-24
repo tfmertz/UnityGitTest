@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 namespace Arkh.CreatorEngine
 {
     public class Tool
@@ -9,7 +10,7 @@ namespace Arkh.CreatorEngine
         public Tools activeTool;
         // Start currentPosition off at the vector that should be impossible to hover to
         public Vector3 previewPosition = new Vector3(-1, -1, -1);
-        public Color color = Color.red;
+        public Color color;
 
         CreateVoxel currentVoxelCreator
         {
@@ -142,7 +143,7 @@ namespace Arkh.CreatorEngine
                 case Tools.Add:
                     // TODO take the logic out of the createvoxel and add it to the tool to manage
                     // CreateVoxel should be an API the tools use to manipulate the mesh
-                    currentVoxelCreator.Create(position);
+                    currentVoxelCreator.Create(position, color);
                     new UndoAction(UndoAction.Type.ADD, position);
                     break;
                 case Tools.Delete:
