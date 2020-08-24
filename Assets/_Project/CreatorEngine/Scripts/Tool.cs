@@ -11,12 +11,15 @@ namespace Arkh.CreatorEngine
         public Vector3 previewPosition = new Vector3(-1, -1, -1);
         public Color color = Color.red;
 
-        CreateVoxel currentVoxelCreator;
+        CreateVoxel currentVoxelCreator
+        {
+            get { return LayerManager.SelectedLayer.Voxel; }
+        }
         GameObject AddPreview;
 
         public Tool(CreateVoxel createVoxel)
         {
-            currentVoxelCreator = createVoxel;
+            //currentVoxelCreator = createVoxel;
             activeTool = Tools.Add;
 
             // Create add previewer
@@ -25,7 +28,7 @@ namespace Arkh.CreatorEngine
             AddPreview = GameObject.CreatePrimitive(PrimitiveType.Cube);
             AddPreview.name = "AddPreview";
             AddPreview.GetComponent<MeshRenderer>().material = preview;
-            GameObject.Destroy(AddPreview.GetComponent<BoxCollider>());
+            Object.Destroy(AddPreview.GetComponent<BoxCollider>());
             AddPreview.SetActive(false);
             AddPreview.transform.SetParent(createVoxel.Grid.gameObject.transform);
         }
@@ -173,10 +176,12 @@ namespace Arkh.CreatorEngine
             if (undoAction.Action == UndoAction.Type.ADD)
             {
                 activeTool = Tools.Delete;
-            } else if (undoAction.Action == UndoAction.Type.DELETE)
+            }
+            else if (undoAction.Action == UndoAction.Type.DELETE)
             {
                 activeTool = Tools.Add;
-            } else
+            }
+            else
             {
                 color = undoAction.ColorUndoValue;
                 activeTool = Tools.Paint;

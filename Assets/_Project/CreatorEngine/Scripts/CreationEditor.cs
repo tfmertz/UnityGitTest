@@ -13,7 +13,7 @@ namespace Arkh.CreatorEngine
     {
         Creation currentCreation;
         List<Voxel> currentVoxels;
-        
+
         // External references
         public Camera CreatorCamera;
 
@@ -120,22 +120,14 @@ namespace Arkh.CreatorEngine
             // Clean any existing grids
             Exit();
 
-            // Get needed materials
-            Material voxel = Resources.Load<Material>("Voxel");
-
-            // Create grid and voxel creator
-            GameObject voxelCreator = new GameObject("VoxelCreator");
-            CreateVoxel voxelScript = voxelCreator.AddComponent<CreateVoxel>();
-            voxelScript.mat = voxel;
-
+            // Create Grid
             grid = new GameObject("Grid");
             grid.transform.SetParent(transform);
             gridScript = grid.AddComponent<Grid>();
-            gridScript.CreateVoxel = voxelScript;
 
-            voxelCreator.transform.SetParent(grid.transform);
-            voxelScript.Grid = gridScript;
-            
+            // Create voxel Layer
+            CreateVoxelLayer();
+
             gridScript.creatorCamera = CreatorCamera;
 
             // Either find, or add our touch controller
@@ -155,14 +147,52 @@ namespace Arkh.CreatorEngine
             //ResetGridTransform(w, h);
         }
 
+        public void ChangeLayer()
+        {
+            LayerManager manager = GetComponent<LayerManager>();
+            CreateVoxel voxelScript = LayerManager.SelectedLayer.Voxel;
+            SetEditableVoxelLayer(voxelScript);
+        }
+
+        public void DeleteLayer()
+        {
+            Debug.Log("Delete Voxel");
+            LayerManager manager = GetComponent<LayerManager>();
+            CreateVoxel voxelScript = LayerManager.SelectedLayer.Voxel;
+            // delete VoxelScript
+            manager.RemoveLayer(LayerManager.SelectedLayer.ID);
+            Destroy(voxelScript.gameObject);
+        }
+
+        private void SetEditableVoxelLayer(CreateVoxel voxelScript)
+        {
+            gridScript.CreateVoxel = voxelScript;
+        }
+
+        public void CreateVoxelLayer(string vName = "Layer 1")
+        {
+            LayerManager manager = GetComponent<LayerManager>();
+            // Get needed materials
+            Material voxel = Resources.Load<Material>("Voxel");
+
+            // Create grid and voxel creator
+            GameObject voxelCreator = new GameObject("VoxelCreator");
+
+            CreateVoxel voxelScript = voxelCreator.AddComponent<CreateVoxel>();
+            voxelScript.mat = voxel;
+            voxelScript.Grid = gridScript;
+            voxelCreator.transform.SetParent(grid.transform);
+            voxelCreator.transform.localPosition = new Vector3(0, 0, 0);
+            SetEditableVoxelLayer(voxelScript);
+            manager.AddLayer(vName, voxelScript);
+        }
+
         private void ResetGridTransform(int w, int h)
         {
             gridScript.transform.localPosition = new Vector3(w / 2 * -1, 0, h / 2 * -1);
             gridScript.transform.parent.transform.position = new Vector3(w / 2, 0, h / 2);
             if (touchController)
                 touchController.SpinableObject.transform.localPosition = gridScript.transform.parent.transform.position;
-
-            // TODO: Clean up Voxels that exist outside.
         }
         public void ResetGridToCenter()
         {

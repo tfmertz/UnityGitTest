@@ -13,8 +13,6 @@ namespace Arkh.CreatorEngine
         public Material gridMat;
         public Material gridSidesMat;
         public CreateVoxel createVoxel;
-        //
-        //
         public Camera creatorCamera;
         public GameObject voxelParent;
 
@@ -54,8 +52,11 @@ namespace Arkh.CreatorEngine
 
         void CreateGrid()
         {
+            // If the grid transform was rotated, reset it
+            transform.rotation = Quaternion.identity;
+
             // Destroy our existing planes if any
-            foreach(GameObject plane in planes)
+            foreach (GameObject plane in planes)
             {
                 Destroy(plane);
             }
@@ -172,7 +173,7 @@ namespace Arkh.CreatorEngine
                 }
 
                 // Adjust our position based on the tool type and then the local position of grid
-                //CheckNormalsForSides(hit, ref x, ref z, ref y);
+                CheckNormalsForSides(hit, ref x, ref z, ref y);
                 currentPos = new Vector3(x, y, z);
 
                 //Debug.Log($"hit: {hit.point.y}, rounded: {y}, normal: {hit.normal}");
@@ -200,10 +201,10 @@ namespace Arkh.CreatorEngine
 
         private void CheckNormalsForSides(RaycastHit hit, ref int x, ref int z, ref int y)
         {
-            // Check normals for adding on sides
-            if (tool.activeTool == Tool.Tools.Add)
+            // If we are the adding tool and touching a voxel, we need to adjust based on the normal
+            if (tool.activeTool == Tool.Tools.Add && hit.collider.CompareTag("voxel"))
             {
-                if (hit.normal.x == 1 || hit.normal.x == -1)
+                if ((hit.normal.x == 1) || hit.normal.x == -1)
                 {
                     x += (int)hit.normal.x;
                 }
@@ -211,17 +212,10 @@ namespace Arkh.CreatorEngine
                 {
                     z += (int)hit.normal.z;
                 }
-                else if (y > 0 && (hit.normal.y == 1 || hit.normal.y == -1))
+                else if (hit.normal.y == 1 || hit.normal.y == -1)
                 {
                     y += (int)hit.normal.y;
                 }
-            }
-            else if (tool.activeTool == Tool.Tools.Delete)
-            {
-                //if (hit.normal.y == 1 || hit.normal.y == -1)
-                //{
-                //    y += (int) hit.normal.y;
-                //}
             }
         }
 
