@@ -35,6 +35,8 @@ namespace Arkh.CreatorEngine
         public void RenameLayer(string name)
         {
             SelectedLayer.Name = name;
+            Debug.Log("Invoking renaming to:" + name);
+            LayersUpdated.Invoke();
         }
 
         public void RemoveLayer(string guid)
@@ -71,6 +73,7 @@ namespace Arkh.CreatorEngine
             CreationLayer layer = CreationLayers.Find(x => x.ID == guid);
             CreationLayers.RemoveAll(x => x.ID == guid);
             CreationLayers.Insert(position, layer);
+
             LayersUpdated.Invoke();
         }
 

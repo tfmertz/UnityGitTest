@@ -26,14 +26,15 @@ public class TempLayerHolder : MonoBehaviour
         }
         Debug.Log("Add New Buttons:" + Layers.CreationLayers.Count);
         i = 0;
-        foreach (var layers in Layers.CreationLayers)
+        foreach (var layer in Layers.CreationLayers)
         {
-            string vName = "Layer_" + i;
-            Debug.Log(vName);
+            string vName = layer.Name;
+            if (vName == "") vName = "Layer_" + i;
+            Debug.Log("building: "+vName);
             Button b = Instantiate(LayerButton, this.transform);
             LayerButton l = b.gameObject.AddComponent<LayerButton>();
             b.GetComponentInChildren<Text>().text = vName;
-            l.Layer = layers;
+            l.Layer = layer;
             b.onClick.AddListener(() => { SelectLayer(l.Layer); });
             i++;
         }

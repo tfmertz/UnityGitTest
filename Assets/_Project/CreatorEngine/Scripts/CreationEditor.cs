@@ -186,7 +186,13 @@ namespace Arkh.CreatorEngine
             SetEditableVoxelLayer(voxelScript);
             manager.AddLayer(vName, voxelScript);
         }
+        public void RenameLayer(string name)
+        {
+            Debug.Log("renaming to:" + name);
+            LayerManager manager = GetComponent<LayerManager>();
+            manager.RenameLayer(name);
 
+        }
         private void ResetGridTransform(int w, int h)
         {
             gridScript.transform.localPosition = new Vector3(w / 2 * -1, 0, h / 2 * -1);
