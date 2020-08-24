@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace Arkh.CreatorEngine
 {
@@ -39,7 +40,15 @@ namespace Arkh.CreatorEngine
         public void RemoveLayer(string guid)
         {
             CreationLayers.RemoveAll(x => x.ID == guid);
-            SelectedLayer = CreationLayers[0];
+            bool isEmpty = !CreationLayers.Any();
+            if (isEmpty)
+            {
+                SelectedLayer = null;
+            }
+            else
+            {
+                SelectedLayer = CreationLayers[0];
+            }
             LayersUpdated.Invoke();
         }
 

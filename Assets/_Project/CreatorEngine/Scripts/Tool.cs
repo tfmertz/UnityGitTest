@@ -13,7 +13,16 @@ namespace Arkh.CreatorEngine
 
         CreateVoxel currentVoxelCreator
         {
-            get { return LayerManager.SelectedLayer.Voxel; }
+            get { 
+                if (LayerManager.SelectedLayer != null) 
+                { 
+                    return LayerManager.SelectedLayer.Voxel; 
+                }
+                else
+                {
+                    return null;
+                }
+            }
         }
         GameObject AddPreview;
 
