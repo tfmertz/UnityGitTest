@@ -44,6 +44,8 @@ namespace Arkh.CreatorEngine
 
         private void Start()
         {
+            // Add voxel tag
+            gameObject.tag = "voxel";
             CreateVoxelMap();
         }
 
