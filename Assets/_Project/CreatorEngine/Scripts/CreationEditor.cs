@@ -20,6 +20,10 @@ namespace Arkh.CreatorEngine
         GameObject grid;
         Grid gridScript;
 
+        // Temp Variables
+        Quaternion tempRotation;
+        Vector3 tempZoom;
+        int ToggleViewType = 0;
 
         TouchController touchController;
         public void CreateNew(string name)
@@ -204,8 +208,35 @@ namespace Arkh.CreatorEngine
         {
             if (touchController)
             {
+                tempZoom = touchController.TheCamera.transform.localPosition = new Vector3(0, 0, -79);
+                tempRotation = touchController.SpinableObject.transform.rotation = Quaternion.Euler(30, 45, 0);
+            }
+        }
+        public void ToggleView()
+        {
+            int type = ToggleViewType;
+            if (type == 0) // Change to 2D view
+            {
+                ToggleViewType = 1;
+                CreatorCamera.orthographic = true;
+                // save old zoom and rotation
+                tempRotation = touchController.SpinableObject.transform.rotation;
+                tempZoom = touchController.TheCamera.transform.localPosition;
+                // reorient Camera
+                touchController.SpinableObject.transform.rotation = Quaternion.Euler(90, 0, 0);
                 touchController.TheCamera.transform.localPosition = new Vector3(0, 0, -79);
-                touchController.SpinableObject.transform.rotation = Quaternion.Euler(30, 45, 0);
+                Grid g = grid.GetComponent<Grid>();
+                CreatorCamera.orthographicSize = g.height;
+                if (g.width > g.height) CreatorCamera.orthographicSize = g.width;
+            }
+            else // 3D View
+            {
+                ToggleViewType = 0;
+                CreatorCamera.orthographic = false;
+                // reorient Rotation
+                touchController.SpinableObject.transform.rotation = tempRotation;
+                // reorient Camera
+                touchController.TheCamera.transform.localPosition = tempZoom;
             }
         }
     }
