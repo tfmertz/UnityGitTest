@@ -168,6 +168,7 @@ namespace Arkh.CreatorEngine
             LayerManager manager = GetComponent<LayerManager>();
             CreateVoxel voxelScript = LayerManager.SelectedLayer.Voxel;
             SetEditableVoxelLayer(voxelScript);
+            
         }
 
         public void DeleteLayer()

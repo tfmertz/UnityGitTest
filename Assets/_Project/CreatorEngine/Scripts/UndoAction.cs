@@ -8,6 +8,7 @@ namespace Arkh.CreatorEngine
     {
         public static List<UndoAction> UndoList = new List<UndoAction>();
         public static Tool theTool;
+        public static LayerManager theLayerManager;
         //
         private Type action;
         public Type Action { get { return action; } }
@@ -21,6 +22,7 @@ namespace Arkh.CreatorEngine
         public delegate void CallDelegate();
         public delegate void CallDelegateTranslate(Transform t, Transform r);
         public CallDelegate MethodCall;
+        public CreationLayer LayerHolder;
         //
         // Information on Current State 
         //
@@ -29,7 +31,7 @@ namespace Arkh.CreatorEngine
         //
         public CallDelegateTranslate MethodCallTranslate;
 
-        public enum Type { ROTATE, ADD, DELETE, PAINT, ZOOM };
+        public enum Type { ROTATE, ADD, DELETE, PAINT, ZOOM, ADDLAYER, RENAMELAYER, REMOVELAYER, SELECTLAYER, DUPLICATELAYER};
 
         public UndoAction(Type CameraAction, GameObject Gimbal)
         {
@@ -99,6 +101,16 @@ namespace Arkh.CreatorEngine
                 Debug.Log("Skip");
             }
         }
+
+        public UndoAction(Type CreationAction, CreationLayer layer)
+        {
+            // Add a Method Undo Action
+            action = CreationAction;
+            LayerHolder = new CreationLayer(layer.Name, layer.Voxel, layer.Position, layer.ID);
+            Debug.Log("Method Layer Action:" + CreationAction + " Name:"+layer.Name);
+            AddToList();
+        }
+
         public void DoUndo()
         {
             Debug.Log(action);
@@ -135,6 +147,22 @@ namespace Arkh.CreatorEngine
                 case Type.ZOOM:
                     CurrentCameraPosition = Camera.transform.localPosition = CameraUndoPosition;
                     Debug.Log("Camera End:" + CameraUndoPosition);
+                    break;
+                case Type.REMOVELAYER:
+                    Debug.Log("remove."+ LayerHolder);
+                    theLayerManager.DuplicateLayer(LayerHolder, true);
+                    break;
+                case Type.RENAMELAYER:
+                    theLayerManager.RenameLayer(LayerHolder.Name, true);
+                    break;
+                case Type.ADDLAYER:
+                    theLayerManager.RemoveLayer(LayerHolder.ID, true);
+                    break;
+                case Type.SELECTLAYER:
+                    theLayerManager.SelectLayer(LayerHolder.ID, true);
+                    break;
+                case Type.DUPLICATELAYER:
+                    theLayerManager.RemoveLayer(LayerHolder.ID, true);
                     break;
             }
             ignoreDuringUndo = false;
