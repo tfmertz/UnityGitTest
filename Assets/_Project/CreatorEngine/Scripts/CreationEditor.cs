@@ -11,7 +11,7 @@ namespace Arkh.CreatorEngine
     /// </summary>
     public class CreationEditor : MonoBehaviour
     {
-       public ColorSelector ColorSelector;
+        public ColorSelector ColorSelector;
 
         Creation currentCreation;
         List<Voxel> currentVoxels;
@@ -27,7 +27,7 @@ namespace Arkh.CreatorEngine
         Vector3 tempZoom;
         int ToggleViewType = 0;
 
-        TouchController touchController;
+        InteractionController touchController;
 
         public void Start()
         {
@@ -147,10 +147,10 @@ namespace Arkh.CreatorEngine
             gridScript.creatorCamera = CreatorCamera;
 
             // Either find, or add our touch controller
-            touchController = gameObject.GetComponent<TouchController>();
+            touchController = gameObject.GetComponent<InteractionController>();
             if (touchController == null)
             {
-                touchController = gameObject.AddComponent<TouchController>();
+                touchController = gameObject.AddComponent<InteractionController>();
             }
             touchController.TheCamera = CreatorCamera;
             touchController.theGrid = gridScript;
@@ -168,7 +168,7 @@ namespace Arkh.CreatorEngine
             LayerManager manager = GetComponent<LayerManager>();
             CreateVoxel voxelScript = LayerManager.SelectedLayer.Voxel;
             SetEditableVoxelLayer(voxelScript);
-            
+
         }
 
         public void DeleteLayer()
@@ -190,17 +190,8 @@ namespace Arkh.CreatorEngine
         {
             LayerManager manager = GetComponent<LayerManager>();
             // Get needed materials
-            Material voxel = Resources.Load<Material>("Voxel");
-
-            // Create grid and voxel creator
-            GameObject voxelCreator = new GameObject("VoxelCreator");
-
-            CreateVoxel voxelScript = voxelCreator.AddComponent<CreateVoxel>();
-            voxelScript.mat = voxel;
-            voxelScript.Grid = gridScript;
-            voxelCreator.transform.SetParent(grid.transform);
-            voxelCreator.transform.localPosition = new Vector3(0, 0, 0);
-            SetEditableVoxelLayer(voxelScript);
+            CreateVoxel voxelScript = gridScript.CreateVoxelLayer(gridScript.gameObject);
+            //SetEditableVoxelLayer(voxelScript);
             manager.AddLayer(vName, voxelScript);
         }
         public void RenameLayer(string name)

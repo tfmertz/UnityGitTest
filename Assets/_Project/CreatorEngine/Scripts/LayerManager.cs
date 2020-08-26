@@ -10,7 +10,7 @@ namespace Arkh.CreatorEngine
     {
 
         public delegate void CreateALayer();
-        public event CreateALayer LayersUpdated;
+        public static event CreateALayer LayersUpdated;
 
         // Start is called before the first frame update
         public static List<CreationLayer> CreationLayers = new List<CreationLayer>();
@@ -19,6 +19,29 @@ namespace Arkh.CreatorEngine
         {
             UndoAction.theLayerManager = this;
         }
+
+        public static List<CreationLayer> Save()
+        {
+
+            foreach (CreationLayer layer in CreationLayers)
+            {
+                layer.Serialize();
+
+            }
+            return new List<CreationLayer>(CreationLayers);
+        }
+
+        public static void Load(List<CreationLayer> layers)
+        {
+            CreationLayers = new List<CreationLayer>();
+            CreationLayers = new List<CreationLayer>(layers);
+            foreach (CreationLayer layer in CreationLayers)
+            {
+                Debug.Log("Layer:" + layer.ID);
+            }
+            LayersUpdated.Invoke();
+        }
+
         public void DuplicateLayer(CreationLayer layer, bool undo = false)
         {
             Debug.Log("duplicate of:" + layer.Name);
@@ -29,6 +52,7 @@ namespace Arkh.CreatorEngine
                 new UndoAction(UndoAction.Type.DUPLICATELAYER, SelectedLayer);
             LayersUpdated.Invoke();
         }
+
         public void AddLayer(string name, CreateVoxel voxelLayer, bool undo = false)
         {
             /*GameObject layer = new GameObject();
@@ -37,15 +61,16 @@ namespace Arkh.CreatorEngine
             CreationLayers.Add(cLayer);
             */
             Debug.Log("adding Layer:" + name);
-            SelectedLayer = new CreationLayer(name, voxelLayer, CreationLayers.Count+1);
+            SelectedLayer = new CreationLayer(name, voxelLayer, CreationLayers.Count + 1);
             CreationLayers.Add(SelectedLayer);
             LayersUpdated.Invoke();
-            if(!undo)
+            if (!undo)
                 new UndoAction(UndoAction.Type.ADDLAYER, SelectedLayer);
         }
+
         public void RenameLayer(string name, bool undo = false)
         {
-             if (!undo)
+            if (!undo)
                 new UndoAction(UndoAction.Type.RENAMELAYER, SelectedLayer);
             SelectedLayer.Name = name;
             Debug.Log("Invoking renaming to:" + name);
@@ -54,8 +79,8 @@ namespace Arkh.CreatorEngine
 
         public void RemoveLayer(string guid, bool undo = false)
         {
-            Debug.Log("priming:"+SelectedLayer);
-            
+            Debug.Log("removing:" + SelectedLayer);
+            Debug.Log("ID:" + guid);
             if (!undo)
                 new UndoAction(UndoAction.Type.REMOVELAYER, SelectedLayer);
 
@@ -70,8 +95,6 @@ namespace Arkh.CreatorEngine
                 SelectedLayer = CreationLayers[0];
             }
             LayersUpdated.Invoke();
-
-           
         }
 
         public CreationLayer SelectLayer(string guid, bool undo = false)
@@ -123,8 +146,11 @@ namespace Arkh.CreatorEngine
     {
         public string Name;
         public CreateVoxel Voxel;
+        public Voxel[] voxels;
         public int Position;
-        public string ID { get; private set; }
+        [SerializeField]
+        private string id;
+        public string ID { get { return id; } private set { id = value; } }
 
         public CreationLayer(string name, CreateVoxel voxelLayer, int position = -1, string id = "")
         {
@@ -133,13 +159,17 @@ namespace Arkh.CreatorEngine
 
             Voxel = voxelLayer;
             ID = id;
-            if(ID == "")
+            if (ID == "")
                 ID = System.Guid.NewGuid().ToString();
             Position = position;
             if (position == -1)
-                if(LayerManager.CreationLayers != null)
-                    Position = LayerManager.CreationLayers.Count+1;
+                if (LayerManager.CreationLayers != null)
+                    Position = LayerManager.CreationLayers.Count + 1;
 
+        }
+        public void Serialize()
+        {
+            voxels = Voxel.CurrentVoxels.ToArray();
         }
         /*
         public void Create(string name, CreateVoxel voxelLayer)

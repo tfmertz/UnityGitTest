@@ -1,5 +1,7 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Reflection;
 using UnityEngine;
 
 namespace Arkh.CreatorEngine
@@ -9,6 +11,8 @@ namespace Arkh.CreatorEngine
         public int width = 16; // z will match x
         public int height = 3;
         public float size = 1; // in unity meters
+
+        public bool isDrawing = false;
 
         public Material gridMat;
         public Material gridSidesMat;
@@ -124,7 +128,7 @@ namespace Arkh.CreatorEngine
 
             // Remove the cooking options
             plane.GetComponent<MeshCollider>().cookingOptions -= MeshColliderCookingOptions.CookForFasterSimulation;
-            
+
             plane.transform.position = pos;
             plane.transform.localScale = scale;
             plane.transform.Rotate(rot);
@@ -148,33 +152,13 @@ namespace Arkh.CreatorEngine
                 // translate our hit into localposition
                 Vector3 hPoint = transform.InverseTransformPoint(hit.point);
 
-                // Snap the ray hit to the grid
-                int x = Mathf.FloorToInt(hPoint.x);
-                int y = Mathf.FloorToInt(hPoint.y);
-                int z = Mathf.FloorToInt(hPoint.z);
+                //Vector3 p = SnapPointToGrid(hPoint);
 
-                // For some reason the hit point sometimes is just under the integer increment
-                // so it incorrectly rounds down. So, we check the face normal and
-                // round depending on the face we're touching
-                if (hit.normal.y == 1 || hit.normal.y == -1)
-                {
-                    Debug.Log($"Y face");
-                    y = Mathf.RoundToInt(hPoint.y);
-                    if (hit.normal.y > 0 && y > 0) y--;
-                    if (hit.normal.y < 0 && y == height) y--;
-                } else if (hit.normal.x == 1 || hit.normal.x == -1)
-                {
-                    Debug.Log($"X face");
-                    x = Mathf.RoundToInt(hPoint.x);
-                    if (hit.normal.x > 0 && x > 0) x--;
-                    if (hit.normal.x < 0 && x == width) x--;
-                } else if (hit.normal.z == 1 || hit.normal.z == -1)
-                {
-                    Debug.Log($"Z face");
-                    z = Mathf.RoundToInt(hPoint.z);
-                    if (hit.normal.z > 0 && z > 0) z--;
-                    if (hit.normal.z < 0 && z == width) z--;
-                }
+                hPoint = RoundByNormal(hPoint, hit.normal);
+
+                int x = (int)hPoint.x;
+                int y = (int)hPoint.y;
+                int z = (int)hPoint.z;
 
                 // Adjust our position based on the tool type and then the local position of grid
                 CheckNormalsForSides(hit, ref x, ref z, ref y);
@@ -184,11 +168,15 @@ namespace Arkh.CreatorEngine
                 if (CheckValidGridPosition(currentPos))
                 {
                     validHover = true;
-                    tool.StartPreview(currentPos);
-                    Debug.Log($"Valid position: {x}, {y}, {z}");
-                } else
+                    if (!isDrawing)
+                    {
+                        tool.StartPreview(currentPos);
+                    }
+                    //Debug.Log($"Valid position: {x}, {y}, {z}");
+                }
+                else
                 {
-                    Debug.Log($"Invalid position: {x}, {y}, {z}, {currentPos}");
+                    //Debug.Log($"Invalid position: {x}, {y}, {z}, {currentPos}");
                     validHover = false;
                     // Set the vector to a position that should be impossible to hover
                     tool.StopPreview();
@@ -201,6 +189,75 @@ namespace Arkh.CreatorEngine
                 tool.StopPreview();
             }
             return Vector3.zero;
+        }
+
+        public Vector3 RoundByNormal(Vector3 hPoint, Vector3 normal)
+        {
+
+            Vector3 p = SnapPointToGrid(hPoint);
+
+            // Snap the ray hit to the grid
+            int x = (int)p.x;
+            int y = (int)p.y;
+            int z = (int)p.z;
+
+            // For some reason the hit point sometimes is just under the integer increment
+            // so it incorrectly rounds down. So, we check the face normal and
+            // round depending on the face we're touching
+            if (normal.y == 1 || normal.y == -1)
+            {
+                //Debug.Log($"Y face");
+                y = Mathf.RoundToInt(hPoint.y);
+                if (normal.y > 0 && y > 0) y--;
+                if (normal.y < 0 && y == height) y--;
+            }
+            else if (normal.x == 1 || normal.x == -1)
+            {
+                //Debug.Log($"X face");
+                x = Mathf.RoundToInt(hPoint.x);
+                if (normal.x > 0 && x > 0) x--;
+                if (normal.x < 0 && x == width) x--;
+            }
+            else if (normal.z == 1 || normal.z == -1)
+            {
+                //Debug.Log($"Z face");
+                z = Mathf.RoundToInt(hPoint.z);
+                if (normal.z > 0 && z > 0) z--;
+                if (normal.z < 0 && z == width) z--;
+            }
+
+            return new Vector3(x, y, z);
+        }
+
+        public Vector3 SnapPointToGrid(Vector3 p)
+        {
+            // Snap the ray hit to the grid
+            int x = Mathf.FloorToInt(p.x);
+            int y = Mathf.FloorToInt(p.y);
+            int z = Mathf.FloorToInt(p.z);
+            return new Vector3(x, y, z);
+        }
+        public Vector3? GetTruePosition()
+        {
+            Vector3? hPoint = null;
+            // Raycast from mouse to detect hover
+            RaycastHit hit;
+            if (Physics.Raycast(creatorCamera.ScreenPointToRay(Input.mousePosition), out hit, 300.0f))
+            {
+                // translate our hit into localposition
+                hPoint = transform.InverseTransformPoint(hit.point);
+            }
+            return hPoint;
+        }
+        public Vector3? GetNormalDirection()
+        {
+            Vector3? v = null;
+            RaycastHit hit;
+            if (Physics.Raycast(creatorCamera.ScreenPointToRay(Input.mousePosition), out hit, 300.0f))
+            {
+                return hit.normal;
+            }
+            return v;
         }
 
         private void CheckNormalsForSides(RaycastHit hit, ref int x, ref int z, ref int y)
@@ -233,7 +290,6 @@ namespace Arkh.CreatorEngine
 
         public void DrawVoxelOnMouseDown(Vector3 point)
         {
-
             DrawVoxel(GetGridPosition(point));
         }
 
@@ -247,12 +303,58 @@ namespace Arkh.CreatorEngine
 
         public void Save(Creation creation)
         {
-            creation.voxels = createVoxel.CurrentVoxels.ToArray();
+            //creation.voxels = createVoxel.CurrentVoxels.ToArray();
+            creation.Layers = LayerManager.Save();
         }
 
+        /* public void Load(Creation creation)
+         {
+             //createVoxel.Load(creation.voxels);
+             //createVoxel.Load(creation.Layers);
+         }
+         */
+        public CreateVoxel CreateVoxelLayer(GameObject grid)
+        {
+            Grid gridScript = grid.GetComponent<Grid>();
+            Material voxel = Resources.Load<Material>("Voxel");
+            // Create grid and voxel creator
+            GameObject voxelCreator = new GameObject("VoxelCreator");
+
+            CreateVoxel voxelScript = voxelCreator.AddComponent<CreateVoxel>();
+            voxelScript.mat = voxel;
+            voxelScript.Grid = gridScript;
+            voxelCreator.transform.SetParent(grid.transform);
+            voxelCreator.transform.localPosition = new Vector3(0, 0, 0);
+            gridScript.createVoxel = voxelScript;
+            return voxelScript;
+        }
         public void Load(Creation creation)
         {
-            createVoxel.Load(creation.voxels);
+
+            int i = 0;
+            // Reset our position map before load
+            Debug.Log("Loading:" + creation.Layers.Count);
+            // get the parent
+            GameObject parent = createVoxel.transform.parent.gameObject;
+            // clean up
+            Destroy(createVoxel);
+            // start over
+            foreach (CreationLayer layer in creation.Layers)
+            {
+                CreateVoxel v = CreateVoxelLayer(parent);
+                //Destroy(v.GetComponent<MeshCollider>());
+
+                Voxel[] voxels = layer.voxels;
+
+                v.Load(voxels);
+                createVoxel = v;
+                layer.Voxel = v;
+                Debug.Log("ID:" + layer.ID);
+                i++;
+            }
+
+            //CreateVoxelMesh(currentVoxels.ToArray());
+            LayerManager.Load(creation.Layers);
         }
 
         public void Undo()

@@ -171,7 +171,7 @@ namespace Arkh.CreatorEngine
             //return voxelMap[(int)pos.x, (int)pos.y, (int)pos.z];
             if (voxelMapString.ContainsKey(key))
             {
-                return (int) voxelMapString[key];
+                return (int)voxelMapString[key];
             }
 
             return -1;
@@ -238,6 +238,7 @@ namespace Arkh.CreatorEngine
             };
             mesh.RecalculateNormals();
 
+            Debug.Log(mesh);
             meshFilter.mesh = mesh;
             meshRenderer.material = mat;
 
@@ -245,7 +246,7 @@ namespace Arkh.CreatorEngine
             if (!isPreview)
             {
                 currentMesh = mesh;
-                currentVoxelMap = (Hashtable) voxelMapString.Clone();
+                currentVoxelMap = (Hashtable)voxelMapString.Clone();
                 meshCollider.sharedMesh = mesh;
             }
         }

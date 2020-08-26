@@ -10,7 +10,8 @@ namespace Arkh.CreatorEngine
     public class Creation
     {
         public string name;
-        public Voxel[] voxels;
+        //public Voxel[] voxels;
+        public List<CreationLayer> Layers;
     }
 
     [System.Serializable]

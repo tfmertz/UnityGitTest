@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -6,11 +6,12 @@ namespace Arkh.CreatorEngine
 {
     public class Tool
     {
-        public enum Tools { Add, Delete, Paint }
+        public enum Tools { Add, Delete, Paint, VoxelPaint }
         public Tools activeTool;
         // Start currentPosition off at the vector that should be impossible to hover to
         public Vector3 previewPosition = new Vector3(-1, -1, -1);
         public Color color;
+        public static Hashtable DragPositions = new Hashtable();
 
         CreateVoxel currentVoxelCreator
         {
@@ -48,6 +49,27 @@ namespace Arkh.CreatorEngine
             activeTool = tool;
         }
 
+        public void ClearDragPositions()
+        {
+            DragPositions = new Hashtable();
+        }
+        public bool AddDragPosition(Vector3 pos)
+        {
+            int x = Mathf.FloorToInt(pos.x);
+            int y = Mathf.FloorToInt(pos.y);
+            int z = Mathf.FloorToInt(pos.z);
+
+            if (DragPositions.ContainsKey($"{x},{y},{z}"))
+            {
+                Debug.Log("ALREADY EXISTS");
+                return false;
+            }
+            int index = DragPositions.Count + 1;
+            string key = $"{(int)pos.x},{(int)pos.y},{(int)pos.z}";
+            DragPositions.Add(key, index);
+            return true;
+        }
+
         // Handles the voxel creator preview for the active tool
         public void StartPreview(Vector3 pos)
         {
@@ -69,7 +91,7 @@ namespace Arkh.CreatorEngine
             {
                 case Tools.Add:
                     if (AddPreview == null) return;
-                    AddPreview.SetActive(true);
+                        AddPreview.SetActive(true);
                     AddPreview.transform.localPosition = pos + new Vector3(0.5f, 0.5f, 0.5f);
                     break;
                 case Tools.Delete:
@@ -101,7 +123,9 @@ namespace Arkh.CreatorEngine
                     voxels[index].color = color;
                     currentVoxelCreator.Preview(voxels.ToArray());
                     break;
-
+                case Tools.VoxelPaint:
+                    // Add Voxel Paint func
+                    break;
                 default:
                     Debug.Log("Default preview");
                     AddPreview.SetActive(true);

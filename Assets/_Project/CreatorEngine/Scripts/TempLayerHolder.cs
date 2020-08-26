@@ -13,7 +13,7 @@ public class TempLayerHolder : MonoBehaviour
 
     public void Start()
     {
-        Layers.LayersUpdated += UpdateLayers;
+        LayerManager.LayersUpdated += UpdateLayers;
     }
 
     // Start is called before the first frame update
@@ -29,12 +29,13 @@ public class TempLayerHolder : MonoBehaviour
         foreach (var layer in LayerManager.CreationLayers)
         {
             string vName = layer.Name;
-            Debug.Log("building: "+vName);
+            Debug.Log("building: " + vName);
             Button b = Instantiate(LayerButton, this.transform);
             LayerButton l = b.gameObject.AddComponent<LayerButton>();
             b.GetComponentInChildren<Text>().text = vName;
             l.Layer = layer;
             b.onClick.AddListener(() => { SelectLayer(l.Layer); });
+            SelectLayer(l.Layer);
             i++;
         }
     }
